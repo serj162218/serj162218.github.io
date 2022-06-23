@@ -1,0 +1,36 @@
+{
+  "config": {
+    "archivesPageSize": 25,
+    "archivesPath": "archives",
+    "dateFormat": "YYYY-MM-DD",
+    "feedCount": 5,
+    "feedFullText": false,
+    "footerInfo": "<h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3>",
+    "postPageSize": 5,
+    "postPath": "",
+    "postUrlFormat": "SLUG",
+    "showFeatureImage": true,
+    "siteDescription": "A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.",
+    "siteName": "AnnieMeow",
+    "tagPath": "tag",
+    "tagUrlFormat": "SHORT_ID",
+    "themeName": "paper"
+  },
+  "customConfig": {
+    "contentBgColor": "#f8f9fa",
+    "customCss": ".content::before {\n    content: \"　　\";\n}\n.subtitle::after {\n    content: \"\\A\";\n    white-space: pre;\n}\n.subtitle{\n    font-size: 32px;\n}",
+    "facebook": "",
+    "ga": "",
+    "github": "https://github.com/serj162218",
+    "latestArticleText": "Latest Article",
+    "navBgColor": "#f8f9fa",
+    "nextArticleText": "Next >",
+    "nextPageText": "Next Page",
+    "prevPageText": "Previous Page",
+    "readMoreText": "Read More",
+    "tagListText": "Tags",
+    "twitter": "",
+    "weibo": "",
+    "zhihu": ""
+  }
+}
