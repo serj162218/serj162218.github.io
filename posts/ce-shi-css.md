@@ -7,4 +7,10 @@ hideInList: true
 feature: 
 isTop: false
 ---
+
 <span class="subtitle">拿來測CSS方便我寫作 珍香</span>
+```php=
+$j = 1;
+$j += 2;
+console.log("hji");
+```

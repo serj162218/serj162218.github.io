@@ -9,7 +9,7 @@
     "postPageSize": 5,
     "postPath": "",
     "postUrlFormat": "SLUG",
-    "showFeatureImage": true,
+    "showFeatureImage": false,
     "siteDescription": "A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.",
     "siteName": "AnnieMeow",
     "tagPath": "tag",
