@@ -1,9 +1,27 @@
 {
   "posts": [
     {
-      "content": "\r\n<h1>PHP</h1>\r\n\r\nDateTime\r\n```php=\r\n    //拿現在時間\r\n    $dt = new \\DateTime('NOW');\r\n    //拿月初 2022-07-01 00:00:00\r\n    $dateStart = $dt->format('Y-m-01 00:00:00');\r\n    //拿月底 2022-07-31 23:59:59\r\n    $dateEnd = $dt->format('Y-m-t 23:59:59');\r\n    //拿上個月月初\r\n    $dateStart = date('Y-m-01 00:00:00', strtotime('-1 month'));\r\n    //拿上個月月底\r\n    $dateEnd = date('Y-m-t 23:59:59', strtotime($dateStart));\r\n```\r\n\r\nArray\r\n```php=\r\n    //array_chunk($arr, $len, bool $preserve_keys) 切割陣列內元素成子陣列，preserve_keys = true會保留KEY\r\n    $d = [1,2,3,4];\r\n    print_r(array_chunk($d, 2));\r\n    output: [[1,2], [3,4]]\r\n\r\n    //implode(\" \", $arr) Array to String connects with needles\r\n    $d = [1,2,3,4];\r\n    print_r(implode(\" \", $d));\r\n    output: 1 2 3 4\r\n\r\n    //explode(\" \", $str) String to Array split with needles\r\n    $s = \"1 2 3 4\";\r\n    print_r(explode(\" \",$s));\r\n    output: [1,2,3,4]\r\n```\r\n\r\nYii\r\n```php=\r\n    //SELECT\r\n    Yii::app()->db->createCommand(\"SELECT * FROM test WHERE id = 1\")->queryAll();\r\n    //UPDATE, DELETE, INSERT\r\n    Yii::app()->db->createCommand(\"...\")->execute();\r\n\r\n    //Model Search\r\n    //By Attributes\r\n    $member = Member::model()->findByAttributes(['role' => 1]);\r\n    //Primary key, ex: id = 1\r\n    $member = Member::model()->findByPk(1);\r\n\r\n    //transaction start\r\n    $transaction = Yii::app()->db->beginTransaction();\r\n    //commit\r\n    $transaction->commit();\r\n    //rollback\r\n    $transaction->rollback();\r\n\r\n    //request\r\n    $request = app()->request;\r\n    //GET, default = 1\r\n    $id = $request->getQuery('id', '1');\r\n    //POST\r\n    //is this from post\r\n    if($request->isPostRequest){...}\r\n    //getPost, default = 1\r\n    $id = $request->getPost('id', '1');\r\n\r\n\r\n```",
+      "content": "\r\n<span class=\"subtitle\">隨筆</span>\r\n有遇過kill -15 PID 結果砍不掉的問題\r\n但是程式整個卡住，無法確定是不是因為程式跑太久，或是有太多連線導致程式無法正常結束\r\n此時就會用kill -9強制結束\r\n但kill -9 無法砍掉子行程，會讓子行程的父PID變成1\r\n如果kill -15不行，就-9把master砍掉，再把底下的子行程用-15砍掉，看能不能全砍\r\n\r\nps -ef | grep webServer 看這隻程式與子行程\r\n所有人 PID 父PID(最大是1) unknown 執行時間 unknown 執行多久 後面參數不確定\r\nps aux | grep master 看所有master",
       "data": {
-        "title": "常用的程式碼紀錄",
+        "title": "kill -9 v.s. kill -15",
+        "date": "2022-07-11 16:43:13",
+        "tags": [
+          "program"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "kill-9-vs-kill-15"
+    },
+    {
+      "content": "\r\n<h1>PHP</h1>\r\n\r\nDateTime\r\n```php=\r\n    //拿現在時間\r\n    $dt = new \\DateTime('NOW');\r\n    //拿月初 2022-07-01 00:00:00\r\n    $dateStart = $dt->format('Y-m-01 00:00:00');\r\n    //拿月底 2022-07-31 23:59:59\r\n    $dateEnd = $dt->format('Y-m-t 23:59:59');\r\n    //拿上個月月初\r\n    $dateStart = date('Y-m-01 00:00:00', strtotime('-1 month'));\r\n    //拿上個月月底\r\n    $dateEnd = date('Y-m-t 23:59:59', strtotime($dateStart));\r\n```\r\n\r\n密碼驗證\r\n```php=\r\n    // 線上生成的都用這個，很好用\r\n    // https://phppasswordhash.com/\r\n    // 產生PWD\r\n    password_hash($pwd, PASSWORD_DEFAULT)\r\n    // 驗證用\r\n    password_verify($pwd, $hash)，正確回傳true\r\n    if (!password_verify($pwd, $hash))\r\n        throw new Exception(\"錯誤\");\r\n```\r\n\r\nArray\r\n```php=\r\n    //array_chunk($arr, $len, bool $preserve_keys) 切割陣列內元素成子陣列，preserve_keys = true會保留KEY\r\n    $d = [1,2,3,4];\r\n    print_r(array_chunk($d, 2));\r\n    output: [[1,2], [3,4]]\r\n\r\n    //implode(\" \", $arr) Array to String connects with needles\r\n    $d = [1,2,3,4];\r\n    print_r(implode(\" \", $d));\r\n    output: 1 2 3 4\r\n\r\n    //explode(\" \", $str) String to Array split with needles\r\n    $s = \"1 2 3 4\";\r\n    print_r(explode(\" \",$s));\r\n    output: [1,2,3,4]\r\n```\r\n\r\nYii\r\n```php=\r\n    //SELECT\r\n    Yii::app()->db->createCommand(\"SELECT * FROM test WHERE id = 1\")->queryAll();\r\n    //UPDATE, DELETE, INSERT\r\n    Yii::app()->db->createCommand(\"...\")->execute();\r\n\r\n    //Model Search\r\n    //By Attributes\r\n    $member = Member::model()->findByAttributes(['role' => 1]);\r\n    //Primary key, ex: id = 1\r\n    $member = Member::model()->findByPk(1);\r\n\r\n    //transaction start\r\n    $transaction = Yii::app()->db->beginTransaction();\r\n    //commit\r\n    $transaction->commit();\r\n    //rollback\r\n    $transaction->rollback();\r\n\r\n    //request\r\n    $request = app()->request;\r\n    //GET, default = 1\r\n    $id = $request->getQuery('id', '1');\r\n    //POST\r\n    //is this from post\r\n    if($request->isPostRequest){...}\r\n    //getPost, default = 1\r\n    $id = $request->getPost('id', '1');\r\n\r\n\r\n```",
+      "data": {
+        "title": "常用的程式碼紀錄 PHP & Yii",
         "date": "2022-07-07 14:09:00",
         "tags": [
           "program"

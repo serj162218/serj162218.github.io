@@ -1,5 +1,5 @@
 ---
-title: '常用的程式碼紀錄'
+title: '常用的程式碼紀錄 PHP & Yii'
 date: 2022-07-07 14:09:00
 tags: [program]
 published: true
@@ -22,6 +22,18 @@ DateTime
     $dateStart = date('Y-m-01 00:00:00', strtotime('-1 month'));
     //拿上個月月底
     $dateEnd = date('Y-m-t 23:59:59', strtotime($dateStart));
+```
+
+密碼驗證
+```php=
+    // 線上生成的都用這個，很好用
+    // https://phppasswordhash.com/
+    // 產生PWD
+    password_hash($pwd, PASSWORD_DEFAULT)
+    // 驗證用
+    password_verify($pwd, $hash)，正確回傳true
+    if (!password_verify($pwd, $hash))
+        throw new Exception("錯誤");
 ```
 
 Array
