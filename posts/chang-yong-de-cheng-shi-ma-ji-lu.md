@@ -24,6 +24,18 @@ DateTime
     $dateEnd = date('Y-m-t 23:59:59', strtotime($dateStart));
 ```
 
+密碼驗證
+```php=
+    // 線上生成的都用這個，很好用
+    // https://phppasswordhash.com/
+    // 產生PWD
+    password_hash($pwd, PASSWORD_DEFAULT)
+    // 驗證用
+    password_verify($pwd, $hash)，正確回傳true
+    if (!password_verify($pwd, $hash))
+        throw new Exception("錯誤");
+```
+
 Array
 ```php=
     //array_chunk($arr, $len, bool $preserve_keys) 切割陣列內元素成子陣列，preserve_keys = true會保留KEY
