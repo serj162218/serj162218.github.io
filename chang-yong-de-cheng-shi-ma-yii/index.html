@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>常用的程式碼 - Yii | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1658308930897">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/tags" class="menu">
+                Tags
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>常用的程式碼 - Yii</h1>
+            <p class="article-meta">
+              2022-07-13
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <pre><code class="language-php=">    //SELECT
+    Yii::app()-&gt;db-&gt;createCommand(&quot;SELECT * FROM test WHERE id = 1&quot;)-&gt;queryAll();
+    //UPDATE, DELETE, INSERT
+    Yii::app()-&gt;db-&gt;createCommand(&quot;...&quot;)-&gt;execute();
+
+    //Model Search
+    //By Attributes
+    $member = Member::model()-&gt;findByAttributes(['role' =&gt; 1]);
+    //Primary key, ex: id = 1
+    $member = Member::model()-&gt;findByPk(1);
+
+    //transaction start
+    $transaction = Yii::app()-&gt;db-&gt;beginTransaction();
+    //commit
+    $transaction-&gt;commit();
+    //rollback
+    $transaction-&gt;rollback();
+
+    //request
+    $request = app()-&gt;request;
+    //GET, default = 1
+    $id = $request-&gt;getQuery('id', '1');
+    //POST
+    //is this from post
+    if($request-&gt;isPostRequest){...}
+    //getPost, default = 1
+    $id = $request-&gt;getPost('id', '1');
+
+    //dataProvider by array data
+    $dataProvider = new CArrayDataProvider($data, [
+    'sort' =&gt; array(
+        'defaultOrder' =&gt; 'id ASC',
+        'attributes' =&gt; array(
+            &quot;id&quot;, &quot;count&quot; //可以點擊排序
+        )
+    ),
+]);
+
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/kill-9-vs-kill-15/">
+                <h3 class="post-title">
+                  kill -9 v.s. kill -15
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1658308930897" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/chang-yong-de-cheng-shi-ma-mysql/">常用的程式碼 - MySQL</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/chang-yong-de-cheng-shi-ma-git/">常用的程式碼 - git</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/chang-yong-de-cheng-shi-ma-zhi-ling/">常用的程式碼 - 指令</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/chang-yong-de-cheng-shi-ma-yii/">常用的程式碼 - Yii</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/kill-9-vs-kill-15/">kill -9 v.s. kill -15</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/chang-yong-de-cheng-shi-ma-ji-lu/">常用的程式碼 - PHP</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/sql-vs-nosql/">SQL vs NoSQL</a>
+            </li>
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hBJuzNhU4/" class="badge warning">
+          program
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3> | <a class="rss" href="https://serj162218.github.io//atom.xml" target="_blank">RSS</a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>
