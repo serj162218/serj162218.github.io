@@ -50,3 +50,12 @@ if(!in_array($lastMsg['message']['from']['id'],$allowID)) return false;
 ```
 
 因為webhook不太好看有沒有記錄傳進來，所以我用了個資料表專門記錄傳進來的資料
+
+因為telegram的伺服器會有時差，連db的設定檔可以多這句
+```php=
+$GLOBALS['pdo']->prepare("SET time_zone = 'Asia/Taipei'");
+```
+程式內若有用到DateTime()，也可以靠這句改時區
+```php=
+$dt = new DateTime('now', new DateTimeZone('Asia/Taipei'));
+```
