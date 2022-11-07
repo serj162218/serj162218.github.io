@@ -62,7 +62,7 @@ reverse() //reverse this array.
 
 arr1.concat(arr2) // return a new array with two arrays combination, it won't change neither arr1 nor arr2.
 
-include(val) //return true if array contains this value, else return false
+includes(val) //return true if array contains this value, else return false
 
 indexOf(val) //like include, but return the position, or -1
 

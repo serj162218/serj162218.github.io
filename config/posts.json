@@ -1,6 +1,70 @@
 {
   "posts": [
     {
+      "content": "insert mode\r\ni\r\nnormal\r\nesc\r\n左下上右\r\nh j k l\r\n移動到下個單字\r\nw\r\n移動到此字的首\r\nb\r\n移動到此字的尾\r\ne\r\n\r\n數字+指令 = 重複指令三次\r\n3h -> 往左三下 3w -> 跳三次下個單字\r\n\r\ninsert mode也能配數字\r\n3igo esc -> gogogo\r\n30i- esc -> 30個-\r\n\r\n找下(上)個字，可以配數字 (單行搜尋)\r\nf F\r\nfo -> 找下個o\r\nFo -> 找上個o\r\n3fq -> 往下找第三個q\r\n\r\n找( { [ 配對的括弧\r\n%\r\n\r\n到句子首尾\r\n0 $\r\n\r\n跳到這個字的下(上)個地方 例如在the用*就會到下個the\r\n* #\r\n\r\n到檔案一開始(最後面)\r\ngg G\r\n\r\n到特定的行數 行數+G\r\n2G -> 第二行\r\n\r\n搜尋字 (往下 往上)\r\n/ n N\r\n例如 / text 搜尋text 然後往下(n)\r\n\r\ninsert new line(往下 往上) 會變insert mode\r\no O\r\n\r\ndelete word\r\nx X\r\n\r\nreplace one word\r\nr + 要的字\r\n\r\ndelete command\r\nd\r\ndw 刪掉下個單字\r\np可以貼上刪掉的字\r\nd2e 可以配數字刪掉兩個字\r\n\r\n重複上個指令\r\n.\r\nd2w後用 . 可以一直執行 d2w\r\n\r\nvisual mode (選取模式)\r\nv\r\nex: v + e + l + d 刪掉目前這個字\r\n\r\n:w (save) :q (quit) :q! (quit without saving)\r\n\r\nu undo ctrl + R redo",
+      "data": {
+        "title": "vim 指南",
+        "date": "2022-11-01 12:07:57",
+        "tags": [],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "vim-zhi-nan"
+    },
+    {
+      "content": "<h1>遞迴版本</h1>\r\n從0,0開始往四個方向走，用一個array去存現在走哪個方向\r\n如果碰到終點(maze.length-1 && maze.length -1)就代表成功了\r\n如果有一條遞迴的路成功了，就一直把這成功的訊息傳下去\r\n如果這條路失敗了，就把array剛剛存的「現在走的方向」移除掉\r\n最後輸出array就是答案了\r\n在走的時候，下一步不能是原點，也不能超出範圍\r\n\r\n<h1>Recursion</h1>\r\nStart with (0,0) (you can start with any point)\r\nThere must be a way to exit.\r\nUse recursive to try any four direction, then use an array to save what directions it goes.\r\nIf the way is return true, keep returning true until the start of the recursion.\r\nIf the way is failed. pop out the latest array you push in.\r\nThe next step can't be neither start point nor out of range.\r\n\r\n```javascript=\r\nlet findRoad = function (maze) {\r\n    let road = [];\r\n    helper(maze, road, 0, 0);\r\n    return road;\r\n}\r\n\r\nlet helper = function (maze, road, i, j) {\r\n    if (i == maze.length - 1 && j == maze[i].length - 1) return true;\r\n\r\n    /**\r\n     * i+1 S\r\n     * i-1 N\r\n     * j+1 E\r\n     *j-1 W\r\n     */\r\n\r\n    if (j < maze[i].length - 1 && maze[i][j + 1] !== 0) {\r\n        maze[i][j + 1] = 0;\r\n        road.push(\"E\");\r\n        if (helper(maze, road, i, j + 1) == true) return true;\r\n    }\r\n    if (i < maze.length - 1 && maze[i + 1][j] !== 0) {\r\n        maze[i + 1][j] = 0;\r\n        road.push(\"S\");\r\n        if (helper(maze, road, i + 1, j) == true) return true;\r\n    }\r\n    if (i > 0 && maze[i - 1][j] !== 0 && !(i == 1 && j == 0)) {\r\n        maze[i - 1][j] = 0;\r\n        road.push(\"N\");\r\n        if (helper(maze, road, i - 1, j) == true) return true;\r\n    }\r\n    if (j > 0 && maze[i][j - 1] !== 0 && !(i == 0 && j == 1)) {\r\n        maze[i][j - 1] = 0;\r\n        road.push(\"W\");\r\n        if (helper(maze, road, i, j - 1) == true) return true;\r\n    }\r\n    road.pop();\r\n}\r\n\r\nlet maze = [\r\n    [1, 1, 1, 1, 1],\r\n    [0, 1, 0, 0, 1],\r\n    [0, 1, 0, 0, 1],\r\n    [0, 0, 1, 0, 1],\r\n    [0, 0, 1, 1, 1],\r\n]\r\nlet maze2 = [\r\n    [1, 1, 1, 0, 1],\r\n    [0, 1, 0, 0, 1],\r\n    [0, 1, 1, 0, 1],\r\n    [0, 0, 1, 0, 1],\r\n    [0, 0, 1, 1, 1],\r\n];\r\nlet maze3 = [\r\n    [1, 1, 1, 1, 1],\r\n    [1, 0, 0, 0, 0],\r\n    [1, 0, 1, 1, 1],\r\n    [1, 0, 1, 0, 1],\r\n    [1, 1, 1, 0, 1],\r\n];\r\nlet maze4 = [\r\n    [1, 0, 0, 0, 1],\r\n    [1, 1, 1, 0, 0],\r\n    [1, 0, 1, 0, 1],\r\n    [1, 0, 1, 0, 1],\r\n    [1, 0, 1, 1, 1],\r\n];\r\nconsole.log(findRoad(maze));\r\nconsole.log(findRoad(maze2));\r\nconsole.log(findRoad(maze3));\r\nconsole.log(findRoad(maze4));\r\n```\r\n\r\n<h1>迴圈</h1>\r\n使用array紀錄走過的路，然後用String紀錄方向\r\n起點先設為0(代表走過了)\r\n判斷四個方向中不是0的路，走過去時用array紀錄「走之前的座標」，並用String紀錄剛剛的方向，然後把「現在要走的座標」設為0代表走過了。\r\n當走到終點時把迴圈break掉\r\n如果走到死路了，因為有用array紀錄剛剛的路，所以可以回到上一個點，String也要把剛剛最後紀錄的方向刪掉。\r\n最後印出String就是答案了\r\n\r\n<h1>Iteration </h1>\r\nUse an array to record the road it just went, then use a string to record the directions.\r\nThe start point is set to 0.\r\nGoing four diections which is not 0, use array to record the position before go, then use string to record the direction. Remeber to set the point to 0, means it has passed this way.\r\nTo break the loop if it arrive the end.\r\nIf there's no way to go, use the latest item in array, then delete the latest char in String.\r\n\r\nPrint out the String, which is the answer.\r\n\r\n```javascript=\r\nlet findRoad = function (maze) {\r\n    return helper(maze, 0, 0);\r\n}\r\n\r\nlet helper = function (maze, i, j) {\r\n    let road = [];\r\n    let roadStr = \"\";\r\n    maze[0][0] = 0;\r\n    while (true) {\r\n        if(i === maze.length - 1 && j  === maze[i].length - 1) break;\r\n        if (i < maze.length - 1 && maze[i + 1][j] !== 0) {\r\n            road.push([i, j]);\r\n            roadStr += \"S\";\r\n            maze[i + 1][j] = 0;\r\n            i++;\r\n        } else if (i > 0 && maze[i - 1][j] !== 0) {\r\n            road.push([i, j]);\r\n            roadStr += \"N\";\r\n            maze[i - 1][j] = 0;\r\n            i--;\r\n        } else if (j < maze[i].length - 1 && maze[i][j + 1] !== 0) {\r\n            road.push([i, j]);\r\n            roadStr += \"E\";\r\n            maze[i][j + 1] = 0;\r\n            j++;\r\n        } else if (j > 0 && maze[i][j - 1] !== 0) {\r\n            road.push([i, j]);\r\n            roadStr += \"W\";\r\n            maze[i][j - 1] = 0;\r\n            j--;\r\n        } else {\r\n            let tmp = road.pop();\r\n            i = tmp[0];\r\n            j = tmp[1];\r\n            roadStr = roadStr.substring(0, roadStr.length - 1);\r\n        }\r\n    }\r\n    return roadStr;\r\n}\r\n\r\nlet maze = [\r\n    [1, 1, 1, 1, 1],\r\n    [0, 1, 0, 0, 1],\r\n    [0, 1, 0, 0, 1],\r\n    [0, 0, 1, 0, 1],\r\n    [0, 0, 1, 1, 1],\r\n]\r\nlet maze2 = [\r\n    [1, 1, 1, 0, 1],\r\n    [0, 1, 0, 0, 1],\r\n    [0, 1, 1, 0, 1],\r\n    [0, 0, 1, 0, 1],\r\n    [0, 0, 1, 1, 1],\r\n];\r\nlet maze3 = [\r\n    [1, 1, 1, 1, 1],\r\n    [1, 0, 0, 0, 0],\r\n    [1, 0, 1, 1, 1],\r\n    [1, 0, 1, 0, 1],\r\n    [1, 1, 1, 0, 1],\r\n];\r\nlet maze4 = [\r\n    [1, 0, 0, 0, 1],\r\n    [1, 1, 1, 0, 0],\r\n    [1, 0, 1, 0, 1],\r\n    [1, 0, 1, 0, 1],\r\n    [1, 0, 1, 1, 1],\r\n];\r\nlet maze5 = [\r\n    [1, 0, 1, 1, 1],\r\n    [1, 1, 1, 0, 1],\r\n    [0, 0, 1, 0, 1],\r\n    [0, 1, 1, 0, 1],\r\n    [1, 1, 0, 0, 1],\r\n];\r\nconsole.log(findRoad(maze));\r\nconsole.log(findRoad(maze2));\r\nconsole.log(findRoad(maze3));\r\nconsole.log(findRoad(maze4));\r\nconsole.log(findRoad(maze5));\r\n```",
+      "data": {
+        "title": "Maze find a way out with Javascript ( Recursion & Iteration )",
+        "date": "2022-10-14 15:38:17",
+        "tags": [],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "maze-find-a-way-out-with-javascript-recursion"
+    },
+    {
+      "content": "the algorithm is reference by https://www.youtube.com/watch?v=WLvU5EQVZqY\r\n```javascript=\r\nfunction TreeNode(val, left, right) {\r\n    this.val = (val === undefined ? 0 : val)\r\n    this.left = (left === undefined ? null : left)\r\n    this.right = (right === undefined ? null : right)\r\n}\r\n\r\nvar order = function (root) {\r\n    if (!root) return [];\r\n    let h = root;\r\n    let ans = [];\r\n    let stack = [];\r\n    let map = new Map();\r\n    do {\r\n        if(h && map.get(h)){\r\n            map.set(h, map.get(h)+1);\r\n        }else if(h){\r\n            map.set(h, 1);\r\n        }\r\n\r\n        if(map.get(h) === 1){ // 1 = preorder, 2 = inorder, 3 = postorder\r\n            ans.push(h);\r\n        }\r\n\r\n        if(!h){\r\n            h = stack.pop();\r\n        }\r\n        else if (h.left !== -1) {\r\n            stack.push(h);\r\n            let b = h.left;\r\n            h.left = -1;\r\n            h = b;\r\n        } else if (h.right !== -1) {\r\n            stack.push(h);\r\n            let b = h.right;\r\n            h.right = -1;\r\n            h = b;\r\n        } else if (h.left === -1 && h.right === -1){\r\n            h = stack.pop();\r\n        }\r\n    } while (stack.length || h === root);\r\n    ans = ans.map(v => v.val);\r\n    return ans;\r\n};\r\n```",
+      "data": {
+        "title": "Three types of Order in Binary Tree with Javascript ( Iteration )",
+        "date": "2022-10-13 17:57:24",
+        "tags": [],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "three-types-of-order-in-binary-tree-with-javascript"
+    },
+    {
+      "content": "Preorder, the first time pointer meet the node, print it out.\r\n\r\n```javascript=\r\n//structor\r\nfunction TreeNode(val, left, right) {\r\n     this.val = (val===undefined ? 0 : val)\r\n     this.left = (left===undefined ? null : left)\r\n     this.right = (right===undefined ? null : right)\r\n }\r\n\r\nvar preorderTraversal = function(root) {\r\n    if(!root) return [];\r\n    let ans = [];\r\n    let h = root;\r\n    \r\n    let stack = []; //to remember the previous node\r\n    while(h){\r\n        if(!ans.includes(h)){\r\n            ans.push(h); // not h.val because h.val may be duplicated.\r\n        }\r\n        if(h.left !== null && !ans.includes(h.left)){\r\n            stack.push(h);\r\n            h = h.left;\r\n        }else if(h.right !== null && !ans.includes(h.right)){\r\n            stack.push(h);\r\n            h = h.right;\r\n        }else{\r\n            h = stack.pop();\r\n        }\r\n    }\r\n\r\n    //switch h to h.val\r\n    ans = ans.map(v => v.val);\r\n    \r\n    return ans;\r\n};\r\n```",
+      "data": {
+        "title": "Binary Tree Preorder Traversal with Javascript ( Iteration )",
+        "date": "2022-10-12 17:20:24",
+        "tags": [],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "binary-tree-preorder-traversal-with-javascript-not-recursive"
+    },
+    {
       "content": "- Every node can only have at most 2 children.\r\n\r\nThis tree is imcompleted because it doesn't have delete function and auto-balance function.\r\n```javascript=\r\nclass Tree {\r\n    constructor(val) {\r\n        this.root = new Heap(val);\r\n    }\r\n    add(val, heap = this.root) {\r\n        if (val >= heap.val) {\r\n            if (heap.right !== null) {\r\n                this.add(val, heap.right);\r\n            } else {\r\n                heap.right = new Heap(val);\r\n            }\r\n        } else {\r\n            if (heap.left !== null) {\r\n                this.add(val, heap.left);\r\n            } else {\r\n                heap.left = new Heap(val);\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nclass Heap {\r\n    constructor(val, left, right) {\r\n        this.val = val ? val : null;\r\n        this.left = left ? left : null;\r\n        this.right = right ? right : null;\r\n    }\r\n}\r\n\r\nlet tree = new Tree(5);\r\ntree.add(3);\r\ntree.add(7);\r\ntree.add(8);\r\ntree.add(4);\r\nconsole.log(tree);\r\n```",
       "data": {
         "title": "Javascript instance Binary Tree with simple code",
@@ -53,7 +117,7 @@
       "fileName": "telegram-bot-kai-fa-xin-de"
     },
     {
-      "content": "複製到剪貼簿\r\n```javascript=\r\n    <div onclick=\"copy(this)\">text for copying.</div>\r\n    function copy(element) {\r\n        console.log($(element));\r\n        let str = $(element).text();\r\n        navigator.clipboard.writeText(str).then(() =>\r\n            alert(\"copied\");\r\n        );\r\n    };\r\n```\r\n比直接用append更好的產生element的方式\r\n```javascript=\r\nlet option = $(\"<option>\", {\"d-id\":e['id'], text: e['name']});\r\n$(\"#type\").append(option);\r\n```\r\najax範例\r\n```js=\r\n $.ajax({\r\n            url: url,\r\n            data,\r\n            method: \"GET\",\r\n            dataType: \"json\",\r\n        }.done((rs) => {\r\n\r\n        }).fail((rs) => {\r\n\r\n        })\r\n```\r\najax會重複用的話可以變成一個新的function\r\n```js=\r\n    let callAjax = (data, url, method, dataType) => {\r\n        return $.ajax({\r\n            url,\r\n            data,\r\n            method,\r\n            dataType,\r\n        });\r\n    }\r\n    callAjax(data, url, method, dataType).done()...\r\n```\r\n\r\nArray common function\r\n\r\n```javascript=\r\n//add vs delete\r\npush()  pop() //latest element in this array\r\nunshift()  shift() //first element in this array\r\n\r\nsplice(index, nums) //remove the specified position element with multiple amount.\r\n\r\nreverse() //reverse this array.\r\n\r\narr1.concat(arr2) // return a new array with two arrays combination, it won't change neither arr1 nor arr2.\r\n\r\ninclude(val) //return true if array contains this value, else return false\r\n\r\nindexOf(val) //like include, but return the position, or -1\r\n\r\njoin(', ') //print out the element as string, split with argument\r\n```\r\n\r\n",
+      "content": "複製到剪貼簿\r\n```javascript=\r\n    <div onclick=\"copy(this)\">text for copying.</div>\r\n    function copy(element) {\r\n        console.log($(element));\r\n        let str = $(element).text();\r\n        navigator.clipboard.writeText(str).then(() =>\r\n            alert(\"copied\");\r\n        );\r\n    };\r\n```\r\n比直接用append更好的產生element的方式\r\n```javascript=\r\nlet option = $(\"<option>\", {\"d-id\":e['id'], text: e['name']});\r\n$(\"#type\").append(option);\r\n```\r\najax範例\r\n```js=\r\n $.ajax({\r\n            url: url,\r\n            data,\r\n            method: \"GET\",\r\n            dataType: \"json\",\r\n        }.done((rs) => {\r\n\r\n        }).fail((rs) => {\r\n\r\n        })\r\n```\r\najax會重複用的話可以變成一個新的function\r\n```js=\r\n    let callAjax = (data, url, method, dataType) => {\r\n        return $.ajax({\r\n            url,\r\n            data,\r\n            method,\r\n            dataType,\r\n        });\r\n    }\r\n    callAjax(data, url, method, dataType).done()...\r\n```\r\n\r\nArray common function\r\n\r\n```javascript=\r\n//add vs delete\r\npush()  pop() //latest element in this array\r\nunshift()  shift() //first element in this array\r\n\r\nsplice(index, nums) //remove the specified position element with multiple amount.\r\n\r\nreverse() //reverse this array.\r\n\r\narr1.concat(arr2) // return a new array with two arrays combination, it won't change neither arr1 nor arr2.\r\n\r\nincludes(val) //return true if array contains this value, else return false\r\n\r\nindexOf(val) //like include, but return the position, or -1\r\n\r\njoin(', ') //print out the element as string, split with argument\r\n```\r\n\r\n",
       "data": {
         "title": "常用的程式碼 - Javascript",
         "date": "2022-07-25 14:31:42",
