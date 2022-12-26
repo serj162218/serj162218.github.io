@@ -18,7 +18,7 @@
   },
   "customConfig": {
     "contentBgColor": "#f8f9fa",
-    "customCss": ".content::before {\n    content: \"　　\";\n}\n.subtitle::after {\n    content: \"\\A\";\n    white-space: pre;\n}\n.subtitle{\n    font-size: 32px;\n}",
+    "customCss": ".content::before {\n    content: \"　　\";\n}\n.subtitle::after {\n    content: \"\\A\";\n    white-space: pre;\n}\n.subtitle{\n    font-size: 32px;\n}\ncode{\n    font-family: \"Consolas\"\n}\narticle p{\n    font-family: \"Consolas\"\n}",
     "facebook": "",
     "ga": "",
     "github": "https://github.com/serj162218",

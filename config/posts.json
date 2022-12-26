@@ -1,6 +1,132 @@
 {
   "posts": [
     {
+      "content": "###### tags: `leetcode`\r\n\r\n[74. Search a 2D Matrix](https://leetcode.com/problems/search-a-2d-matrix/)\r\n\r\nIntroduce:\r\n> Write an efficient algorithm that searches for a value target in an m x n integer matrix matrix. This matrix has the following properties:\r\n> - Integers in each row are sorted from left to right.\r\n> - The first integer of each row is greater than the last integer of the previous row.\r\n\r\n\r\nExample 1:\r\n\r\n> Input: matrix = [[1,3,5,7],[10,11,16,20], [23,30,34,60]], target = 3\r\n> Output: true\r\n\r\nExample 2:\r\n\r\n> Input: matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 13\r\n> Output: false\r\n\r\n \r\n\r\nConstraints:\r\n> - m == matrix.length\r\n> - n == matrix[i].length\r\n> - 1 <= m, n <= 100\r\n> - -104 <= matrix[i][j], target <= 104\r\n\r\n\r\n---\r\n\r\ntips:\r\n> - The last integer in every row is always less than the next row's first integer.\r\n> - Because m and n could be a very big number, it's not a nice option to search every row and column (O(m\\*n))\r\n> - By the first tip, compare the first element in every row, then search the row which is the most possible with target.\r\n> - The time complexity is O(logn) because it will execute at most two binary search.\r\n\r\n```javascript=\r\nlet searchMatrix = (matrix, target) => {\r\n    let L = 0, R = matrix.length - 1;\r\n    let M;\r\n    while (L < R) {\r\n        M = ~~((L + R) / 2);\r\n        if (M > 0 && matrix[M][0] > target && matrix[M - 1][0] < target) return searchValue(matrix[M - 1], target);\r\n        else if (M < matrix.length - 1 && matrix[M][0] < target && matrix[M + 1][0] > target) return searchValue(matrix[M], target);\r\n\r\n        if (matrix[M][0] > target) R = M;\r\n        else if (matrix[M][0] < target) L = M + 1;\r\n        else return searchValue(matrix[M], target);\r\n    }\r\n    return searchValue(matrix[R], target);\r\n};\r\n\r\nlet searchValue = (arr, target) => {\r\n    if (arr.length < 2) return arr[0] == target ? true : false;\r\n    let L = 0, R = arr.length - 1;\r\n    let M;\r\n    while (L < R) {\r\n        M = ~~((L + R) / 2);\r\n        if (arr[M] > target) R = M - 1;\r\n        else if (arr[M] < target) L = M + 1;\r\n        else return true;\r\n    }\r\n    return arr[R] == target ? true : false;\r\n}\r\n```",
+      "data": {
+        "title": "74. Search a 2D Matrix",
+        "date": "2022-12-26 15:00:45",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "74-search-a-2d-matrix"
+    },
+    {
+      "content": "## Introduce\r\nMake a simple todolist with below.\r\n- Express\r\n- Typescript\r\n- Prisma\r\n- gulp\r\n- ejs\r\n\r\napp(router)\r\n    - app.ts\r\n    - config.ts\r\n    - todo.ts\r\nprisma(orm)\r\n    - schema.prisma\r\nviews\r\n    - index.ejs\r\n    - todo.ejs\r\ngulpfile.js\r\n\r\n---\r\n\r\n## Database structure\r\n![](https://i.imgur.com/QH9BsIg.png)\r\n\r\n---\r\n\r\n## Code\r\n\r\n### app.ts\r\n```typescript=\r\nimport express from 'express';\r\nimport path from 'path';\r\n//router from todo, separate them for scalability in future.\r\nimport { todo } from './todo';\r\n\r\nconst app = express();\r\n\r\n//view engine\r\napp.set('view engine', 'ejs');\r\n\r\n//bodyEncoder, using for POST from form\r\napp.use(express.json());\r\napp.use(express.urlencoded({\r\n    extended: true\r\n}));\r\n\r\napp.use(express.static(path.join(__dirname, 'public')));\r\n//include todo's router\r\napp.use('/', todo);\r\n\r\n//index\r\napp.get('/', async (req, res) => {\r\n    res.redirect('/todo');\r\n});\r\n\r\n//listening\r\napp.listen(3000, () => {\r\n    console.log(\"listening port on 3000.\");\r\n})\r\n```\r\n### config.ts\r\n```typescript=\r\nimport { PrismaClient } from '@prisma/client'\r\nconst database = new PrismaClient();\r\n\r\nexport { database };\r\n```\r\n### todo.ts\r\n```typescript=\r\nimport express from 'express';\r\nimport { database } from './config';\r\n\r\nconst router = express.Router();\r\n\r\nrouter.get('/todo', async (req, res) => {\r\n    res.render('index');\r\n});\r\n\r\n//Separate front-end and backend\r\nrouter.get('/loadTodolist', async (req, res) => {\r\n    const todolist = await database.todolist.findMany();\r\n    res.json(todolist);\r\n})\r\n\r\nrouter.get('/todo/:id', async (req, res) => {\r\n    res.render('todo');\r\n});\r\n\r\n//API for ajax\r\nrouter.get('/loadTasks/:id', async (req, res) => {\r\n    //load all the tasks which are belong to this id's todolist\r\n    const tasks = await database.todolist.findUnique(\r\n        {\r\n            where: { id: parseInt(req.params.id) },\r\n            include: {\r\n                taskrelations:\r\n                {\r\n                    include: { taskdetails: true }\r\n                }\r\n            }\r\n        }\r\n    );\r\n    res.json(tasks);\r\n});\r\n\r\nrouter.post('/addTodo', async (req, res) => {\r\n    const name = req.body.name;\r\n    console.log(name);\r\n    const createTodolist = await database.todolist.create({\r\n        data: {\r\n            name: name,\r\n        }\r\n    });\r\n    res.json(createTodolist);\r\n});\r\n\r\n//create a new task, will also create a task's relation, Prisma is useful btw.\r\nrouter.post('/todo/:id', async (req, res) => {\r\n    const id = req.params.id;\r\n    const task = await database.taskdetails.create({\r\n        data: {\r\n            name: req.body.name,\r\n            finished: false,\r\n            taskrelations: {\r\n                create: [\r\n                    { todolist: { connect: { id: parseInt(id) } }, },\r\n                ]\r\n            }\r\n        }\r\n    });\r\n    res.json(task);\r\n});\r\n\r\n//delete the task and the task relations at the same time.\r\nrouter.delete('/todo', async (req, res) => {\r\n    const taskid = parseInt(req.body.id);\r\n\r\n    await database.taskdetails.delete({\r\n        where: {\r\n            id: taskid\r\n        },\r\n        include: {\r\n            taskrelations: true\r\n        }\r\n    });\r\n    res.sendStatus(200);\r\n});\r\n\r\n//update the task's \"finished\" attribute\r\nrouter.patch('/todo', async (req, res) => {\r\n    const taskid = parseInt(req.body.id);\r\n    const checked = req.body.checked === \"true\" ? true : false;\r\n    await database.taskdetails.update({\r\n        where: {\r\n            id: taskid\r\n        },\r\n        data: {\r\n            finished: checked\r\n        }\r\n    });\r\n    res.sendStatus(200);\r\n});\r\n\r\nexport { router as todo }\r\n```\r\n### schema.prisma\r\n```javascript=\r\n/*\r\n * Prisma generate a model relations by using command.\r\n * I'm using mysql in this project, if you use sqlite or others, remember to change the latest word.\r\n * Remember to set the settings in .env which is created by prisma itself.\r\n * npx prisma init --datasource-provider mysql\r\n * npx prisma db pull\r\n * npx prisma generate\r\n * \r\n */\r\ngenerator client {\r\n  provider = \"prisma-client-js\"\r\n}\r\n\r\ndatasource db {\r\n  provider = \"mysql\"\r\n  url      = env(\"DATABASE_URL\")\r\n}\r\n\r\nmodel taskdetails {\r\n  id            Int             @id @default(autoincrement())\r\n  name          String          @db.VarChar(100)\r\n  finished      Boolean\r\n  createdAt     DateTime        @default(now()) @db.DateTime(0)\r\n  updatedAt     DateTime        @default(now()) @db.DateTime(0)\r\n  taskrelations taskrelations[]\r\n}\r\n\r\n//I add foreign key in data table, it will automatic create by itself when I use command.\r\nmodel taskrelations {\r\n  id          Int         @id @default(autoincrement())\r\n  task_id     Int\r\n  list_id     Int\r\n  todolist    todolist    @relation(fields: [list_id], references: [id], onDelete: Cascade, map: \"foreign_list\")\r\n  taskdetails taskdetails @relation(fields: [task_id], references: [id], onDelete: Cascade, map: \"foreign_task\")\r\n\r\n  @@index([list_id], map: \"foreign_list\")\r\n  @@index([task_id], map: \"foreign_task\")\r\n}\r\n\r\nmodel todolist {\r\n  id            Int             @id @default(autoincrement())\r\n  name          String          @db.VarChar(50)\r\n  taskrelations taskrelations[]\r\n}\r\n```\r\n### index.ejs\r\n```javascript=\r\n<script src=\"https://code.jquery.com/jquery-3.6.1.min.js\"\r\n    integrity=\"sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=\" crossorigin=\"anonymous\"></script>\r\n\r\n<body>\r\n    <input type=\"text\" id=\"todolistName\" placeholder=\"todolist-name\">\r\n    <button id=\"addTodolistBtn\">new Todolist</button>\r\n    <ul id=\"todolist\">\r\n    </ul>\r\n</body>\r\n<script>\r\n    let addTodolist = () => {\r\n        let name = $(\"#todolistName\").val();\r\n        if ($.trim(name) == '') {\r\n            alert(\"todolist's name cannot be empty.\");\r\n            return false;\r\n        }\r\n        $.ajax({\r\n            url: \"./addTodo\",\r\n            data: { name },\r\n            method: \"POST\",\r\n            dataType: \"json\"\r\n        }).done(rs => {\r\n            let e = $(\"<a>\", { href: `./todo/${rs.id}`, text: rs.name });\r\n            e = $(\"<h1>\").append(e);\r\n            e = $(\"<li>\").append(e);\r\n            $(\"#todolist\").append(e);\r\n        }).fail(rs => console.error(rs));\r\n    }\r\n\r\n    let loadTodolist = () => {\r\n        $.ajax({\r\n            url: \"./loadTodolist\",\r\n            method: \"GET\",\r\n            dataType: \"json\"\r\n        }).done(rs => {\r\n            rs.forEach(element => {\r\n                let e = $(\"<a>\", { href: `./todo/${element.id}`, text: element.name });\r\n                e = $(\"<h1>\").append(e);\r\n                e = $(\"<li>\").append(e);\r\n                $(\"#todolist\").append(e);\r\n            });\r\n        }).fail(rs => console.error(rs));\r\n    }\r\n\r\n    $(\"body\").ready(() => {\r\n        loadTodolist();\r\n        $(\"body\").on(\"click\", \"#addTodolistBtn\", addTodolist);\r\n    })\r\n</script>\r\n```\r\n### todo.ejs\r\n```javascript=\r\n<script src=\"https://code.jquery.com/jquery-3.6.1.min.js\"\r\n    integrity=\"sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=\" crossorigin=\"anonymous\"></script>\r\n\r\n<body>\r\n    <a href=\"/todo\">Index</a>\r\n    <h1 id=\"todolist-name\"></h1>\r\n    <ol id=\"task-container\">\r\n    </ol>\r\n    <form method=\"post\">\r\n        name: <input name=\"name\" id=\"taskName\">\r\n        <button type=\"button\" id=\"submitBtn\">submit</button>\r\n    </form>\r\n</body>\r\n<script>\r\n    let todoID = new URL(location.href).pathname.split('/')[2];\r\n    let loadTasks = () => {\r\n        if (!todoID.match(/\\d/)) return;\r\n\r\n        $.ajax({\r\n            url: `/loadTasks/${todoID}`,\r\n            method: \"GET\",\r\n            dataType: \"json\",\r\n        }).done(rs => {\r\n            $(\"#todolist-name\").text(rs.name);\r\n            rs['taskrelations'].forEach(task => {\r\n                let e = $(\"<span>\", { text: task.taskdetails.name });\r\n                let btn = $(\"<button>\", { class: 'deleteTaskBtn', text: 'x', \"d-id\": task.taskdetails.id });\r\n                let checkbox = $(\"<input>\", { type: 'checkbox', class: 'checkTaskBtn', \"d-id\": task.taskdetails.id, \"checked\": task.taskdetails.finished });\r\n                \r\n                e = $(\"<li>\", { \"d-id\": task.taskdetails.id }).append(btn, e, checkbox);\r\n                $(\"#task-container\").append(e);\r\n            });\r\n        }).fail(rs => console.error(rs));\r\n    }\r\n\r\n    let addTask = (e) => {\r\n        if (!todoID.match(/\\d/)) return;\r\n\r\n        let name = $(\"#taskName\").val();\r\n        if ($.trim(name) == '') {\r\n            alert(\"task's name cannot be empty.\");\r\n            return false;\r\n        }\r\n        $.ajax({\r\n            url: `/todo/${todoID}`,\r\n            data: { name },\r\n            method: \"POST\",\r\n            dataType: \"json\"\r\n        }).done(task => {\r\n            let e = $(\"<span>\", { text: task.name });\r\n            let btn = $(\"<button>\", { class: 'deleteTaskBtn', text: 'x', \"d-id\": task.id });\r\n            let checkbox = $(\"<input>\", { type: 'checkbox', class: 'checkTaskBtn', \"d-id\": task.id, \"checked\": task.finished });\r\n\r\n            e = $(\"<li>\", { \"d-id\": task.id }).append(btn, e, checkbox);\r\n            $(\"#task-container\").append(e);\r\n        }).fail(rs => console.error(rs));\r\n    }\r\n\r\n    let deleteTask = (e) => {\r\n        let id = $(e.target).attr('d-id');\r\n        $.ajax({\r\n            url: `/todo`,\r\n            data: { id },\r\n            method: \"DELETE\",\r\n            dataType: \"text\"\r\n        }).done(rs => {\r\n            $(\"#task-container\").find(`li[d-id=${id}]`).remove();\r\n        }).fail(rs => console.error(rs));\r\n    }\r\n\r\n    let checkTask = (e) => {\r\n        let id = $(e.target).attr('d-id');\r\n        let checked = $(e.target).is(\":checked\");\r\n        console.log(checked);\r\n        $.ajax({\r\n            url: `/todo`,\r\n            data: { id, checked },\r\n            method: \"PATCH\",\r\n            dataType: \"text\"\r\n        }).done(rs => {\r\n\r\n        }).fail(rs => console.error(rs));\r\n    }\r\n\r\n    $(\"body\").ready(() => {\r\n        loadTasks();\r\n        $(\"body\").on(\"click\", \"#submitBtn\", addTask);\r\n        $(\"body\").on(\"click\", \".deleteTaskBtn\", deleteTask);\r\n        $(\"body\").on(\"change\", \".checkTaskBtn\", checkTask);\r\n    })\r\n\r\n</script>\r\n```\r\n### gulpfile.js\r\n```javascript=\r\n/*\r\n * use gulp to automatic refresh when the code changed.\r\n */\r\nvar gulp = require('gulp');\r\nconst nodemon = require('gulp-nodemon');\r\nconst express = require('gulp-express');\r\n\r\ngulp.task('webserver', function () {\r\n    nodemon({\r\n        script: './app/app.ts',\r\n    });\r\n\r\n    //when below's code changed, refresh the task.\r\n    gulp.watch('./app/*.ts', express.notify);\r\n    gulp.watch('./app/view/*.html', express.notify);\r\n});\r\n\r\n//use command -> \"gulp serve\" to start the task\r\ngulp.task('serve', gulp.series('webserver'));\r\n```",
+      "data": {
+        "title": "Todolist Example(Javascript + Web Application)",
+        "date": "2022-12-14 11:28:01",
+        "tags": [
+          "javascript"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "todolist-examplejavascript-web-application"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[22. Generate Parentheses](https://leetcode.com/problems/generate-parentheses/)\r\n\r\nIntroduce:\r\n> Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.\r\n\r\nExample 1:\r\n\r\n> Input: n = 3\r\n> Output: [\"((()))\",\"(()())\",\"(())()\",\"()(())\",\"()()()\"]\r\n\r\nExample 2:\r\n\r\n> Input: n = 1\r\n> Output: [\"()\"]\r\n\r\n \r\n\r\n> Constraints:\r\n>     1 <= n <= 8\r\n\r\n---\r\n\r\ntips:\r\n* Because n defined the amount of pairs, n\\*2 is equal to the string's length.\r\n* The left parenthesis amount is always equal or bigger than the right parenthesis amount.\r\n* Using dfs to try every sets which is in the condition above.\r\n\r\n```javascript=\r\nvar generateParenthesis = function (n) {\r\n    let dfs = (n, str, open, close) => {\r\n        if (str.length === n * 2) {\r\n            ans.push(str);\r\n            return true;\r\n        }\r\n\r\n        if (open < n)\r\n            dfs(n, str + \"(\", open + 1, close);\r\n\r\n        if (open > close)\r\n            dfs(n, str + \")\", open, close + 1);\r\n\r\n    }\r\n    let ans = [];\r\n    dfs(n, \"\", 0, 0);\r\n    return ans;\r\n};\r\n```",
+      "data": {
+        "title": "22. Generate Parentheses",
+        "date": "2022-12-09 14:15:59",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "22-generate-parentheses"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[150. Evaluate Reverse Polish Notation](https://leetcode.com/problems/evaluate-reverse-polish-notation/description/)\r\n\r\nintroduce:\r\nEvaluate the value of an arithmetic expression in Reverse Polish Notation.\r\n\r\nValid operators are +, -, *, and /. Each operand may be an integer or another expression.\r\n\r\nNote that division between two integers should truncate toward zero.\r\n\r\nIt is guaranteed that the given RPN expression is always valid. That means the expression would always evaluate to a result, and there will not be any division by zero operation.\r\n\r\nExample 1:\r\n> Input: tokens = [\"2\",\"1\",\"+\",\"3\",\"*\"]\r\n> Output: 9\r\n> Explanation: ((2 + 1) * 3) = 9\r\n\r\nExample 2:\r\n\r\n> Input: tokens = [\"4\",\"13\",\"5\",\"/\",\"+\"]\r\n> Output: 6\r\n> Explanation: (4 + (13 / 5)) = 6\r\n\r\nExample 3:\r\n\r\n> Input: tokens = [\"10\",\"6\",\"9\",\"3\",\"+\",\"-11\",\"*\",\"/\",\"*\",\"17\",\"+\",\"5\",\"+\"]\r\n> Output: 22\r\n> Explanation: ((10 * (6 / ((9 + 3) * -11))) + 17) + 5\r\n> = ((10 * (6 / (12 * -11))) + 17) + 5\r\n> = ((10 * (6 / -132)) + 17) + 5\r\n> = ((10 * 0) + 17) + 5\r\n> = (0 + 17) + 5\r\n> = 17 + 5\r\n> = 22\r\n\r\n---\r\n![](https://i.imgur.com/SLOKPY4.png)\r\n\r\n```javascript=\r\nvar evalRPN = function (tokens) {\r\n    let numArr = [];\r\n    for (let i of tokens) {\r\n        switch (i) {\r\n            case \"+\":\r\n                numArr.push(parseInt(numArr.pop() + numArr.pop()));\r\n                break;\r\n            case \"-\":\r\n                //[3,4] => 3-4 => -4+3 = -1\r\n                numArr.push(parseInt(-numArr.pop() + numArr.pop()));\r\n                break;\r\n            case \"*\":\r\n                numArr.push(parseInt(numArr.pop() * numArr.pop()));\r\n                break;\r\n            case \"/\":\r\n                //[2,5]=>2/5, so we need to use variable.\r\n                let numB = numArr.pop();\r\n                let numA = numArr.pop();\r\n                //not using Math.floor() because 1/(-2) = -1, not we want.\r\n                numArr.push(parseInt(numA / numB));\r\n                break;\r\n            default:\r\n                numArr.push(parseInt(i));\r\n                break;\r\n        }\r\n    }\r\n    return numArr[0];\r\n};\r\n```",
+      "data": {
+        "title": "150. Evaluate Reverse Polish Notation",
+        "date": "2022-12-08 14:17:54",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "150-evaluate-reverse-polish-notation"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[155. Min Stack](https://leetcode.com/problems/min-stack/description/)\r\n\r\nintroduce:\r\nDesign a stack that supports push, pop, top, and retrieving the minimum element in constant time.\r\n\r\nImplement the MinStack class:\r\n\r\n    MinStack() initializes the stack object.\r\n    void push(int val) pushes the element val onto the stack.\r\n    void pop() removes the element on the top of the stack.\r\n    int top() gets the top element of the stack.\r\n    int getMin() retrieves the minimum element in the stack.\r\n\r\nYou must implement a solution with O(1) time complexity for each function.\r\n\r\nExample 1:\r\n\r\n> Input\r\n> [\"MinStack\",\"push\",\"push\",\"push\",\"getMin\",\"pop\",\"top\",\"getMin\"]\r\n> [[],[-2],[0],[-3],[],[],[],[]]\r\n> \r\n> Output\r\n> [null,null,null,null,-3,null,0,-2]\r\n> \r\n> Explanation\r\n> MinStack minStack = new MinStack();\r\n> minStack.push(-2);\r\n> minStack.push(0);\r\n> minStack.push(-3);\r\n> minStack.getMin(); // return -3\r\n> minStack.pop();\r\n> minStack.top();    // return 0\r\n> minStack.getMin(); // return -2\r\n\r\n---\r\n\r\nThis question's point is below\r\n- The time complexity must in O(1).\r\n- It need to remember the minimum value in the stack.\r\n- While popping the value, it can't be scanned again to get the minimum value, so the minimum value must be remembered while pushing.\r\n\r\nI'm using a new constructor call \"Node\" to remember the minimum value for every node.\r\nThis stack is seems like a LinkedList.\r\n```javascript=\r\nclass Node {\r\n    constructor(val, min, next) {\r\n        this.val = val;\r\n        this.min = min;\r\n        this.next = next;\r\n    }\r\n}\r\nclass MinStack {\r\n    constructor() {\r\n        this.head = new Node(null, null, null);\r\n    }\r\n    /**\r\n     * @param {number} val\r\n     * @return {void}\r\n     */\r\n    push(val) {\r\n        this.head = new Node(val, Math.min(val, this.head.min===null?val:this.head.min), this.head);\r\n    }\r\n    /**\r\n     * @return {void}\r\n     */\r\n    pop() {\r\n        this.head = this.head.next;\r\n    }\r\n    /**\r\n     * @return {number}\r\n     */\r\n    top() {\r\n        return this.head.val;\r\n    }\r\n    /**\r\n     * @return {number}\r\n     */\r\n    getMin() {\r\n        return this.head.min;\r\n    }\r\n}\r\n```\r\n\r\n![](https://i.imgur.com/1f00igh.png)\r\n",
+      "data": {
+        "title": "155. Min Stack",
+        "date": "2022-12-07 14:46:54",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "155-min-stack"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[416.partition-equal-subset-sum](https://leetcode.com/problems/partition-equal-subset-sum/description/)\r\n\r\nintroduce:\r\nGiven a non-empty array nums containing only positive integers, find if the array can be partitioned into two subsets such that the sum of elements in both subsets is equal.\r\n\r\nExample 1:\r\n> Input: nums = [1,5,11,5]\r\n> Output: true\r\n> Explanation: The array can be partitioned as [1, 5, 5] and [11].\r\n\r\nExample 2:\r\n\r\n> Input: nums = [1,2,3,5]\r\n> Output: false\r\n> Explanation: The array cannot be partitioned into equal sum subsets.\r\n\r\n---\r\n\r\nBecause the array with be partitioned into two parts, we only need to find the target which is sum(nums)/2.\r\n> note: sum(nums) is always a even number.\r\n\r\nThen there's two way:\r\n1. \r\n![](https://i.imgur.com/nHqlPIQ.png)\r\n\r\n\r\n2. \r\n![](https://i.imgur.com/FnOz6Gg.png)\r\n\r\n---\r\n\r\n1. Set, not efficient.\r\n![](https://i.imgur.com/vWkJlUc.png)\r\n\r\n\r\n```javascript=\r\nvar canPartition = function (nums) {\r\n    let sum = nums.reduce((a, b) => a + b);\r\n    if (sum % 2 == 1) return false;\r\n    \r\n    let target = sum / 2;\r\n    let dp = new Set();\r\n    \r\n    dp.add(0);\r\n    \r\n    for (let i = 0; i < nums.length; i++) {\r\n        let nextDP = new Set(dp);\r\n        \r\n        for (let j of new Set(nextDP)) {\r\n            if (j + nums[i] > target) continue;\r\n            if (j + nums[i] === target) return true;\r\n            nextDP.add(j + nums[i]);\r\n        }\r\n        dp = nextDP;\r\n    }\r\n    \r\n    return dp.has(target) ? true : false;\r\n};\r\n```\r\n\r\n2. Array, still not efficient.\r\n> Similar with using set\r\n> Because using array will iterate every element, so it must add if(dp[key] === true)\r\n> Still not good because the loop at Line.11, array need to deep copy before it.\r\n```javascript=\r\nvar canPartition = function (nums) {\r\n    let sum = nums.reduce((a, b) => a + b);\r\n    if (sum % 2 == 1) return false;\r\n\r\n    let target = sum / 2;\r\n    let dp = Array(target + 1).fill(false);\r\n\r\n    dp[0] = true;\r\n    for (let i = 0; i < nums.length; i++) {\r\n        let nextDP = [...dp];\r\n        for (let key = 0; key < nextDP.length; key++) {\r\n            if (dp[key] === true) {\r\n                nextDP[parseInt(key) + nums[i]] = true;\r\n            }\r\n        }\r\n        dp = nextDP;\r\n    }\r\n    return dp[target] === true;\r\n};\r\n```\r\n\r\n\r\n3. Array (the most efficiently )\r\n\r\n> Line 10: using j is start at target, the idea is to fix the problem below(need to copy every time before it starting to loop)\r\n> j is always need to bigger than nums[i] so it won't be negative.\r\n![](https://i.imgur.com/RVk32Om.png)\r\n\r\n```javascript=\r\nvar canPartition = function (nums) {\r\n    let sum = nums.reduce((a, b) => a + b);\r\n    if (sum % 2 == 1) return false;\r\n\r\n    let target = sum / 2;\r\n    let dp = Array(target + 1).fill(false);\r\n\r\n    dp[0] = true;\r\n    for (let i = 0; i < nums.length; i++) {\r\n        for (let j = target; j >= nums[i]; j--) {\r\n            dp[j] = dp[j - nums[i]] || dp[j];\r\n        }\r\n        if (dp[target] === true) return true;\r\n    }\r\n    return dp[target] === true;\r\n};\r\n```\r\n\r\n---\r\n\r\n1. using Set (Slower than using Array, because by using iterator, it need to deep copy the set first. By doing this, when it is iterating, the origin set won't be effected.)\r\n![](https://i.imgur.com/T8PUAZL.png)\r\n\r\n```javascript=\r\nvar canPartition = function (nums) {\r\n    let sum = nums.reduce((a, b) => a + b);\r\n    if (sum % 2 == 1) return false;\r\n\r\n    let target = sum / 2;\r\n    let dp = new Set();\r\n\r\n    dp.add(target);\r\n\r\n    for (let i of nums) {\r\n        let nextDP = dp;\r\n        for (let j of new Set(nextDP)) {\r\n            if (j >= i)\r\n                nextDP.add(j - i);\r\n        }\r\n        if (dp.has(0)) return true;\r\n    }\r\n    return dp.has(0);\r\n};\r\n```",
+      "data": {
+        "title": "416.partition-equal-subset-sum",
+        "date": "2022-12-07 11:09:45",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "416partition-equal-subset-sum"
+    },
+    {
+      "content": "```javascript=\r\n/**\r\n * Three order method in tree\r\n * the key is \"arr.push(node.val)\"\r\n * preorder = do the things first.\r\n * inorder = do it in the middle.\r\n * postorder = do it last.\r\n * \r\n * This example is postorder\r\n */\r\nvar OrderTraversal = function (root) {\r\n    let arr = [];\r\n    let helper = function (node) {\r\n        if (!node) { return false; }\r\n        helper(node.left);\r\n        helper(node.right);\r\n        arr.push(node.val);\r\n    }\r\n    helper(root);\r\n    return arr;\r\n};\r\n```",
+      "data": {
+        "title": "Three types of Order in Binary Tree with Javascript ( Recursion )",
+        "date": "2022-11-07 16:59:26",
+        "tags": [
+          "program"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "three-types-of-order-in-binary-tree-with-javascript-recursion"
+    },
+    {
       "content": "insert mode\r\ni\r\nnormal\r\nesc\r\n左下上右\r\nh j k l\r\n移動到下個單字\r\nw\r\n移動到此字的首\r\nb\r\n移動到此字的尾\r\ne\r\n\r\n數字+指令 = 重複指令三次\r\n3h -> 往左三下 3w -> 跳三次下個單字\r\n\r\ninsert mode也能配數字\r\n3igo esc -> gogogo\r\n30i- esc -> 30個-\r\n\r\n找下(上)個字，可以配數字 (單行搜尋)\r\nf F\r\nfo -> 找下個o\r\nFo -> 找上個o\r\n3fq -> 往下找第三個q\r\n\r\n找( { [ 配對的括弧\r\n%\r\n\r\n到句子首尾\r\n0 $\r\n\r\n跳到這個字的下(上)個地方 例如在the用*就會到下個the\r\n* #\r\n\r\n到檔案一開始(最後面)\r\ngg G\r\n\r\n到特定的行數 行數+G\r\n2G -> 第二行\r\n\r\n搜尋字 (往下 往上)\r\n/ n N\r\n例如 / text 搜尋text 然後往下(n)\r\n\r\ninsert new line(往下 往上) 會變insert mode\r\no O\r\n\r\ndelete word\r\nx X\r\n\r\nreplace one word\r\nr + 要的字\r\n\r\ndelete command\r\nd\r\ndw 刪掉下個單字\r\np可以貼上刪掉的字\r\nd2e 可以配數字刪掉兩個字\r\n\r\n重複上個指令\r\n.\r\nd2w後用 . 可以一直執行 d2w\r\n\r\nvisual mode (選取模式)\r\nv\r\nex: v + e + l + d 刪掉目前這個字\r\n\r\n:w (save) :q (quit) :q! (quit without saving)\r\n\r\nu undo ctrl + R redo",
       "data": {
         "title": "vim 指南",
@@ -47,22 +173,6 @@
       "excerpt": "",
       "abstract": "",
       "fileName": "three-types-of-order-in-binary-tree-with-javascript"
-    },
-    {
-      "content": "Preorder, the first time pointer meet the node, print it out.\r\n\r\n```javascript=\r\n//structor\r\nfunction TreeNode(val, left, right) {\r\n     this.val = (val===undefined ? 0 : val)\r\n     this.left = (left===undefined ? null : left)\r\n     this.right = (right===undefined ? null : right)\r\n }\r\n\r\nvar preorderTraversal = function(root) {\r\n    if(!root) return [];\r\n    let ans = [];\r\n    let h = root;\r\n    \r\n    let stack = []; //to remember the previous node\r\n    while(h){\r\n        if(!ans.includes(h)){\r\n            ans.push(h); // not h.val because h.val may be duplicated.\r\n        }\r\n        if(h.left !== null && !ans.includes(h.left)){\r\n            stack.push(h);\r\n            h = h.left;\r\n        }else if(h.right !== null && !ans.includes(h.right)){\r\n            stack.push(h);\r\n            h = h.right;\r\n        }else{\r\n            h = stack.pop();\r\n        }\r\n    }\r\n\r\n    //switch h to h.val\r\n    ans = ans.map(v => v.val);\r\n    \r\n    return ans;\r\n};\r\n```",
-      "data": {
-        "title": "Binary Tree Preorder Traversal with Javascript ( Iteration )",
-        "date": "2022-10-12 17:20:24",
-        "tags": [],
-        "published": true,
-        "hideInList": false,
-        "feature": null,
-        "isTop": false
-      },
-      "isEmpty": false,
-      "excerpt": "",
-      "abstract": "",
-      "fileName": "binary-tree-preorder-traversal-with-javascript-not-recursive"
     },
     {
       "content": "- Every node can only have at most 2 children.\r\n\r\nThis tree is imcompleted because it doesn't have delete function and auto-balance function.\r\n```javascript=\r\nclass Tree {\r\n    constructor(val) {\r\n        this.root = new Heap(val);\r\n    }\r\n    add(val, heap = this.root) {\r\n        if (val >= heap.val) {\r\n            if (heap.right !== null) {\r\n                this.add(val, heap.right);\r\n            } else {\r\n                heap.right = new Heap(val);\r\n            }\r\n        } else {\r\n            if (heap.left !== null) {\r\n                this.add(val, heap.left);\r\n            } else {\r\n                heap.left = new Heap(val);\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nclass Heap {\r\n    constructor(val, left, right) {\r\n        this.val = val ? val : null;\r\n        this.left = left ? left : null;\r\n        this.right = right ? right : null;\r\n    }\r\n}\r\n\r\nlet tree = new Tree(5);\r\ntree.add(3);\r\ntree.add(7);\r\ntree.add(8);\r\ntree.add(4);\r\nconsole.log(tree);\r\n```",
@@ -278,6 +388,16 @@
     }
   ],
   "tags": [
+    {
+      "name": "javascript",
+      "slug": "fQfrV7sv2",
+      "used": true
+    },
+    {
+      "name": "leetcode",
+      "slug": "IPziRV_tR",
+      "used": true
+    },
     {
       "index": -1,
       "name": "常用的程式碼",
