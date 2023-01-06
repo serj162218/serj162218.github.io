@@ -42,7 +42,7 @@ tips:
 > - The last integer in every row is always less than the next row's first integer.
 > - Because m and n could be a very big number, it's not a nice option to search every row and column (O(m\*n))
 > - By the first tip, compare the first element in every row, then search the row which is the most possible with target.
-> - The time complexity is O(logn) because it will execute at most two binary search.
+> - The time complexity is O(2logn) because it will execute at most two binary search.
 
 ```javascript=
 let searchMatrix = (matrix, target) => {
