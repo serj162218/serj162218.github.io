@@ -1,6 +1,204 @@
 {
   "posts": [
     {
+      "content": "###### tags: `leetcode`\r\n\r\n[572. Subtree of Another Tree](https://leetcode.com/problems/subtree-of-another-tree/)\r\n\r\n## Dfs compare Method\r\n### Tips:\r\n- The advanced problem of Same Tree.\r\n- Both of root and subroot won't be null.\r\n- Keep tracking the root's node until it's null, then return False. It means none of the root's subtree is same as subRoot's subtree.\r\n- Do not combine Line.6~Line.9 because it will waste more efficiency.\r\n- Time complexity O(m\\*n)\r\n### Code:\r\n```python=\r\nclass Solution:\r\n    def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:\r\n        if not root:\r\n            return False\r\n            \r\n        elif self.isSameTree(root, subRoot):\r\n             return True\r\n        else:\r\n            return self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)\r\n\r\n    def isSameTree(self, p, q):\r\n        if p == None or q == None:\r\n            return p == q\r\n        \r\n        if p.val == q.val:\r\n            return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)\r\n        else:\r\n            return False\r\n```\r\n\r\n## String compare Method\r\n\r\n### Tips:\r\n- This idea is convert all the node's val into string. Then compare if subRoot's str is in root's str.\r\n- It's more faster than below's method, the time complexity is O(m+n) which m = root's node total amounts and n = subroot's node total amounts.\r\n### Code:\r\n```python=\r\nclass Solution:\r\n    def isSubtree(self, root, subRoot) -> bool:\r\n        rootStr = self.traverse(root)\r\n        subStr = self.traverse(subRoot)\r\n        return subStr in rootStr\r\n\r\n    def traverse(self, node) -> str:\r\n        if node:\r\n            return f\"^{node.val} {self.traverse(node.left)} {self.traverse(node.right)}\"\r\n        return None\r\n```",
+      "data": {
+        "title": "572. Subtree of Another Tree",
+        "date": "2023-01-12 17:18:48",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "572-subtree-of-another-tree"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[100. Same Tree](https://leetcode.com/problems/same-tree/description/)\r\n\r\n### Tips:\r\n- if p or q is null, check if both of them are null.\r\n- check (every two nodes's val) and (their left and right nodes).\r\n- This kind of problem is very basic. The method will be used in many questions.\r\n### Code:\r\n```python=\r\nclass Solution:\r\n    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:\r\n        if p == None or q == None:\r\n            return p == q\r\n        return p.val == q.val and self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)\r\n```",
+      "data": {
+        "title": "100. Same Tree",
+        "date": "2023-01-12 17:18:32",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "100-same-tree"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[110. Balanced Binary Tree](https://leetcode.com/problems/balanced-binary-tree/description/)\r\n\r\n### Tips:\r\n- The advanced problem of maxDepth.\r\n- if abs(left depth - right depth) > 1, means the tree is not height-balanced.\r\n- if left or right < 0, means there has a subtree not equal as height-balanced.\r\n- root can be null and it's still a height-balanced tree, so the depth can >= 0.\r\n### Code:\r\n```python=\r\nclass Solution:\r\n    def isBalanced(self, root: Optional[TreeNode]) -> bool:\r\n        return self.helper(root) >= 0\r\n        \r\n    def helper(self, root) -> int:\r\n        if root == None:\r\n            return 0\r\n\r\n        left, right = self.helper(root.left), self.helper(root.right)\r\n\r\n        if left < 0 or right < 0 or abs(left - right) > 1:\r\n            return -1\r\n        return max(left, right)+1\r\n```",
+      "data": {
+        "title": "110. Balanced Binary Tree",
+        "date": "2023-01-12 17:18:16",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "110-balanced-binary-tree"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[543. Diameter of Binary Tree](https://leetcode.com/problems/diameter-of-binary-tree/description/)\r\n\r\n### Tips:\r\n- The advanced problem of maxDepth.\r\n- Use a global var to keep the max diameter, Then return the max depth between left and right nodes.\r\n- If node is null, return -1 because the leaf's diameter is 0, not 1.\r\n### Code:\r\n```python=\r\nclass Solution:\r\n    def __init__(self):\r\n        self.maxLen = 0\r\n\r\n    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:\r\n        self.helper(root)\r\n        return self.maxLen\r\n\r\n    def helper(self, root) -> int:\r\n        if root == None:\r\n            return -1\r\n        left = self.helper(root.left) + 1\r\n        right = self.helper(root.right) + 1\r\n        self.maxLen = max(self.maxLen, left + right)\r\n        return max(left, right)\r\n```",
+      "data": {
+        "title": "543. Diameter of Binary Tree",
+        "date": "2023-01-12 17:17:57",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "543-diameter-of-binary-tree"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[104. Maximum Depth of Binary Tree](https://leetcode.com/problems/maximum-depth-of-binary-tree/)\r\n\r\n### Tips:\r\n- dfs until the node is None, then return 0\r\n- Return the bigger depth between left node and right node with plus 1.\r\n- This kind of problem is very basic. The method will be used in many questions.\r\n### Code:\r\n```python=\r\nclass Solution:\r\n    def maxDepth(self, root: Optional[TreeNode]) -> int:\r\n        if root == None:\r\n            return 0\r\n        maxDepth = max(self.maxDepth(root.left), self.maxDepth(root.right)) + 1\r\n        return maxDepth\r\n```",
+      "data": {
+        "title": "104. Maximum Depth of Binary Tree",
+        "date": "2023-01-12 17:17:40",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "104-maximum-depth-of-binary-tree"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[226. Invert Binary Tree](https://leetcode.com/problems/invert-binary-tree/description/)\r\n\r\n### Tips:\r\n- dfs with reverting the two node (left and right).\r\n- Remember to return the node.\r\n### Code\r\n```python=\r\nclass Solution:\r\n    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:\r\n        if root == None:\r\n            return\r\n        root.left, root.right = root.right, root.left\r\n        self.invertTree(root.left)\r\n        self.invertTree(root.right)\r\n        return root\r\n```",
+      "data": {
+        "title": "226. Invert Binary Tree",
+        "date": "2023-01-12 17:17:06",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "226-invert-binary-tree"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[146. LRU Cache](https://leetcode.com/problems/lru-cache/)\r\n\r\ntips:\r\n- Make a Double LinkedList {next, prev, val, key} and a hashmap {key: Node}\r\n- On the left side is the least recently use, and on the right side is the most recently use.\r\n- put: remove the node first, then insert it. If len(hashmap) is greater than size, remove the leftest side Node \r\n- get: remove the Node then insert it on the rightest.\r\n\r\n```python=\r\nclass Node:\r\n    def __init__(self, val, key):\r\n        self.val, self.key = val, key\r\n        self.prev, self.next = None, None\r\n\r\n\r\nclass LRUCache:\r\n\r\n    def __init__(self, capacity: int):\r\n        self.cap = capacity\r\n        # least recently use node | most recently use node\r\n        self.left, self.right = Node(0, 0), Node(0, 0)\r\n        self.cache = {}\r\n        self.left.next, self.right.prev = self.right, self.left\r\n    # Remove the LRU node\r\n    def remove(self, node):\r\n        nxt, prev =  node.next, node.prev\r\n        nxt.prev, prev.next = prev, nxt\r\n\r\n    # Insert to the MRU node\r\n    def insert(self, node):\r\n        prev, nxt = self.right.prev, self.right\r\n        prev.next, nxt.prev = node, node\r\n        node.prev, node.next = prev, nxt\r\n\r\n    def get(self, key: int) -> int:\r\n        if key in self.cache:\r\n            self.remove(self.cache[key])\r\n            self.insert(self.cache[key])\r\n            return self.cache[key].val\r\n        return -1\r\n\r\n    def put(self, key: int, value: int) -> None:\r\n        if key in self.cache:\r\n            self.remove(self.cache[key])\r\n        \r\n        self.cache[key] = Node(value, key)\r\n        self.insert(self.cache[key])\r\n\r\n        if len(self.cache) > self.cap:\r\n            lru = self.left.next\r\n            self.remove(lru)\r\n            self.cache.pop(lru.key, None)\r\n            \r\n```",
+      "data": {
+        "title": "146. LRU Cache",
+        "date": "2023-01-09 16:17:09",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "146-lru-cache"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[287. Find the Duplicate Number](https://leetcode.com/problems/find-the-duplicate-number/description/)\r\n\r\nIntroduce:\r\n> Given an array of integers nums containing n + 1 integers where each integer is in the range [1, n] inclusive.\r\nThere is only one repeated number in nums, return this repeated number.\r\nYou must solve the problem without modifying the array nums and uses only constant extra space.\r\n\r\nExample 1:\r\n\r\n> Input: nums = [1,3,4,2,2]\r\nOutput: 2\r\n\r\nExample 2:\r\n\r\n> Input: nums = [3,1,3,4,2]\r\nOutput: 3\r\n\r\n\r\nConstraints:\r\n- 1 <= n <= 105\r\n- nums.length == n + 1\r\n- 1 <= nums[i] <= n\r\n- All the integers in nums appear only once except for precisely one integer which appears two or more times.\r\n\r\n\r\n\r\n---\r\n\r\ntips:\r\n- This is a classic problem with Floyd Cycle Detection Algorithm.\r\n- First, find the node M which fast and slow is the same.\r\n- Second, one pointer starts from beginning, anothoer pointer starts from node M, both of pointers move one by one step until they are point the same node.\r\n\r\n> If you want to know the cycle length, in the node M, let slow pointer move one by one step until it point to the fast pointer.\r\n\r\n```python=\r\nclass Solution:\r\n    def findDuplicate(self, nums: List[int]) -> int:\r\n        slow, fast = nums[0], nums[0]\r\n        while True:\r\n            fast = nums[nums[fast]]\r\n            slow = nums[slow]\r\n            if nums[slow] == nums[fast]:\r\n                break\r\n\r\n        p = nums[0]\r\n        while p != slow:\r\n            p = nums[p]\r\n            slow = nums[slow]\r\n\r\n        return p\r\n```",
+      "data": {
+        "title": "287. Find the Duplicate Number",
+        "date": "2023-01-09 14:32:55",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "287-find-the-duplicate-number"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[2. Add Two Numbers](https://leetcode.com/problems/add-two-numbers/description/)\r\n\r\nIntroduce:\r\n> You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list.\r\nYou may assume the two numbers do not contain any leading zero, except the number 0 itself.\r\n\r\nExample 1:\r\n![](https://assets.leetcode.com/uploads/2020/10/02/addtwonumber1.jpg)\r\n> Input: l1 = [2,4,3], l2 = [5,6,4]\r\nOutput: [7,0,8]\r\nExplanation: 342 + 465 = 807.\r\n\r\nExample 2:\r\n\r\n> Input: l1 = [0], l2 = [0]\r\nOutput: [0]\r\n\r\nExample 3:\r\n\r\n> Input: l1 = [9,9,9,9,9,9,9], l2 = [9,9,9,9]\r\nOutput: [8,9,9,9,0,0,0,1]\r\n\r\nConstraints:\r\n- The number of nodes in each linked list is in the range [1, 100].\r\n- 0 <= Node.val <= 9\r\n- It is guaranteed that the list represents a number that does not have leading zeros.\r\n\r\n\r\n---\r\ntips:\r\n- \"while l1 or l2 or plus == 1\" would cover all the statement.\r\n\r\n```python=\r\nclass Solution:\r\n    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:\r\n        head = ListNode(0)\r\n        cur = head\r\n        plus = 0\r\n        while l1 or l2 or plus == 1:\r\n            v1 = l1.val if l1 else 0\r\n            v2 = l2.val if l2 else 0\r\n            total = v1 + v2 + plus\r\n            plus = total // 10\r\n\r\n            l1 = l1.next if l1 else None\r\n            l2 = l2.next if l2 else None\r\n\r\n            cur.next = ListNode(total % 10)\r\n            cur = cur.next\r\n\r\n        return head.next\r\n```",
+      "data": {
+        "title": "2. Add Two Numbers",
+        "date": "2023-01-09 13:53:20",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "2-add-two-numbers"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[138. Copy List with Random Pointer](https://leetcode.com/problems/copy-list-with-random-pointer/)\r\n\r\nIntroduce:\r\n> A linked list of length n is given such that each node contains an additional random pointer, which could point to any node in the list, or null.\r\nConstruct a deep copy of the list. The deep copy should consist of exactly n brand new nodes, where each new node has its value set to the value of its corresponding original node. Both the next and random pointer of the new nodes should point to new nodes in the copied list such that the pointers in the original list and copied list represent the same list state. None of the pointers in the new list should point to nodes in the original list.\r\nFor example, if there are two nodes X and Y in the original list, where X.random --> Y, then for the corresponding two nodes x and y in the copied list, x.random --> y.\r\nReturn the head of the copied linked list.\r\nThe linked list is represented in the input/output as a list of n nodes. Each node is represented as a pair of [val, random_index] where:\r\nval: an integer representing Node.val\r\nrandom_index: the index of the node (range from 0 to n-1) that the random pointer points to, or null if it does not point to any node.\r\nYour code will only be given the head of the original linked list.\r\n\r\nExample 1:\r\n![](https://assets.leetcode.com/uploads/2019/12/18/e1.png)\r\n> Input: head = [[7,null],[13,0],[11,4],[10,2],[1,0]]\r\nOutput: [[7,null],[13,0],[11,4],[10,2],[1,0]]\r\n\r\nExample 2:\r\n![](https://assets.leetcode.com/uploads/2019/12/18/e2.png)\r\n> Input: head = [[1,1],[2,1]]\r\nOutput: [[1,1],[2,1]]\r\n\r\n\r\nExample 3:\r\n![](https://assets.leetcode.com/uploads/2019/12/18/e3.png)\r\n> Input: head = [[3,null],[3,0],[3,null]]\r\nOutput: [[3,null],[3,0],[3,null]]\r\n\r\n> Constraints:\r\n>     1 <= n <= 8\r\n\r\n---\r\n\r\ntips:\r\n- Use a hashmap to record {old: new} while creating new Linkedlist\r\n\r\n```python=\r\nclass Solution:\r\n    dic = {}\r\n    def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':\r\n        h = head\r\n        n = self.createList(head)\r\n        np = n\r\n        while np:\r\n            if h.random == None:\r\n                np.random = None\r\n            else:\r\n                np.random = self.dic[h.random]\r\n            np = np.next\r\n            h = h.next\r\n        return n\r\n\r\n    def createList(self, head):\r\n        if head == None:\r\n            return None\r\n\r\n        n = Node(head.val, self.createList(head.next), None)\r\n        self.dic[head] = n\r\n        return n\r\n```\r\n\r\n\r\n> Deprecate, it'll affect the original LinkedList with a new attribute \"associate\"\r\n```python=\r\nclass Solution:\r\n    def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':\r\n        h = head\r\n        n = self.createList(head)\r\n        np = n\r\n        while np:\r\n            if h.random == None:\r\n                np.random = None\r\n            else:\r\n                np.random = h.random.associate\r\n            np = np.next\r\n            h = h.next\r\n        return n\r\n\r\n    def createList(self, head):\r\n        if head == None:\r\n            return None\r\n\r\n        n = Node(head.val, self.createList(head.next), None)\r\n        n.associate = head\r\n        head.associate = n\r\n        return n\r\n```",
+      "data": {
+        "title": "138. Copy List with Random Pointer",
+        "date": "2023-01-09 13:05:18",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "138-copy-list-with-random-pointer"
+    },
+    {
+      "content": "###### tags: `leetcode`\r\n\r\n[141. Linked List Cycle](https://leetcode.com/problems/linked-list-cycle/)\r\n\r\nIntroduce:\r\n> Given head, the head of a linked list, determine if the linked list has a cycle in it.\r\n> There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the next pointer. Internally, pos is used to denote the index of the node that tail's next pointer is connected to. Note that pos is not passed as a parameter.\r\n> Return true if there is a cycle in the linked list. Otherwise, return false.\r\n\r\nExample 1:\r\n![](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist.png)\r\n> Input: head = [3,2,0,-4], pos = 1\r\nOutput: true\r\nExplanation: There is a cycle in the linked list, where the tail connects to the 1st node (0-indexed).\r\n\r\nExample 2:\r\n![](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist_test2.png)\r\n> Input: head = [1,2], pos = 0\r\nOutput: true\r\nExplanation: There is a cycle in the linked list, where the tail connects to the 0th node.\r\n\r\nExample 3:\r\n![](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist_test3.png)\r\n>Input: head = [1], pos = -1\r\nOutput: false\r\nExplanation: There is no cycle in the linked list.\r\n\r\n> Constraints:\r\n>     1 <= n <= 8\r\n\r\n---\r\n\r\ntips:\r\n* Floyd Cycle Detection Algorithm\r\n* Make two pointer 'fast' and 'slow'\r\n* fast is always move by 2 steps, slow is always move by 1 step.\r\n* If fast == slow means there's a cycle.\r\n* Else there's no cycle.\r\n\r\n```python=\r\nclass Solution:\r\n    def hasCycle(self, head: Optional[ListNode]) -> bool:\r\n        slow, fast = head, head\r\n\r\n        while fast and fast.next:\r\n            fast = fast.next.next\r\n            slow = slow.next\r\n            if slow == fast:\r\n                return True\r\n        return False\r\n```",
+      "data": {
+        "title": "141. Linked List Cycle",
+        "date": "2023-01-09 11:00:21",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "141-linked-list-cycle"
+    },
+    {
       "content": "###### tags: `leetcode`\r\n\r\n[143. Reorder List](https://leetcode.com/problems/reorder-list/description/)\r\n\r\nIntroduce:\r\n> You are given the head of a singly linked-list. The list can be represented as:\r\n> L0 → L1 → … → Ln - 1 → Ln\r\n> \r\n> Reorder the list to be on the following form:\r\n> L0 → Ln → L1 → Ln - 1 → L2 → Ln - 2 → …\r\n> \r\n> You may not modify the values in the list's nodes. Only nodes themselves may be changed.\r\n\r\n\r\nExample 1:\r\n![](https://assets.leetcode.com/uploads/2021/03/04/reorder1linked-list.jpg)\r\n> Input: head = [1,2,3,4]\r\nOutput: [1,4,2,3]\r\n\r\nExample 2:\r\n![](https://assets.leetcode.com/uploads/2021/03/09/reorder2-linked-list.jpg)\r\n> Input: head = [1,2,3,4,5]\r\nOutput: [1,5,2,4,3]\r\n\r\n \r\n\r\n \r\n\r\nConstraints:\r\n- The number of nodes in the list is in the range [1, 5 * 104].\r\n- 1 <= Node.val <= 1000\r\n\r\n\r\n---\r\n\r\ntips:\r\n- If it's an array, you can use two pointer with L and R to direct order the element. But it's LinkedList now, so you can't left shift R.\r\n- In this case, you can first reverse the LinkedList which is for R to traverse.\r\n- First step, find the middle of LinkedList. Be careful for the fast pointer because we want to find the middle's previous point.\r\n![](https://i.imgur.com/l7t27hn.png)\r\n- Step 2: Reverse the m's next LinkedList.[1,2,4,3]\r\n- To avoid the cycle in step 3(reorder), we will seperate the LinkedList into two pieces.[1,2] [4,3]\r\n- Step 3: Reorder, not a big deal.\r\n\r\n```python=\r\nclass Solution:\r\n    def reorderList(self, head: ListNode) -> None:\r\n        # find Middle\r\n        fast, slow = head, head\r\n        while fast.next and fast.next.next:\r\n            fast = fast.next.next\r\n            slow = slow.next\r\n\r\n        # reverse middle\r\n        curr, prev, next = slow.next, None, None\r\n        while curr != None:\r\n            next = curr.next\r\n            curr.next = prev\r\n            prev = curr\r\n            curr = next\r\n\r\n        \r\n        #break the linkedlist into two piece to prevent cycle in reorder\r\n        slow.next = None\r\n\r\n        # reorder\r\n        L, R = head, prev\r\n        while L and R:\r\n            tmpL = L.next\r\n            tmpR = R.next\r\n\r\n            L.next = R\r\n            L = tmpL\r\n\r\n            R.next = L\r\n            R = tmpR\r\n```",
       "data": {
         "title": "143. Reorder List",
