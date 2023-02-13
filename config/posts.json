@@ -1,6 +1,24 @@
 {
   "posts": [
     {
+      "content": "###### tags: `leetcode`\r\n\r\n[875. Koko Eating Bananas](https://leetcode.com/problems/koko-eating-bananas/description/)\r\n\r\n### Tips:\r\n- From sum the piles into one pile then divided by h, we will get the minimum rate L.\r\n- When piles's amount is equal to h, the maximum rate is R.\r\n- L ~ R, need to find the minimum rate, so it's L <= R.\r\n- ans will be the minimum, so there's no need to use min(ans, k)\r\n### Code:\r\n```python=\r\nclass Solution:\r\n    def minEatingSpeed(self, piles: List[int], h: int) -> int:\r\n        L, R = math.ceil(sum(piles)/h), max(piles)\r\n        ans = R\r\n\r\n        while L <= R:\r\n            k = ((L+R)//2)\r\n            hour = sum(math.ceil(i/k) for i in piles)\r\n            \r\n            if hour > h:\r\n                L = k + 1\r\n            else:\r\n                ans = k\r\n                R = k - 1\r\n        \r\n        return ans\r\n```",
+      "data": {
+        "title": "875. Koko Eating Bananas",
+        "date": "2023-01-13 15:43:13",
+        "tags": [
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "875-koko-eating-bananas"
+    },
+    {
       "content": "###### tags: `leetcode`\r\n\r\n[572. Subtree of Another Tree](https://leetcode.com/problems/subtree-of-another-tree/)\r\n\r\n## Dfs compare Method\r\n### Tips:\r\n- The advanced problem of Same Tree.\r\n- Both of root and subroot won't be null.\r\n- Keep tracking the root's node until it's null, then return False. It means none of the root's subtree is same as subRoot's subtree.\r\n- Do not combine Line.6~Line.9 because it will waste more efficiency.\r\n- Time complexity O(m\\*n)\r\n### Code:\r\n```python=\r\nclass Solution:\r\n    def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:\r\n        if not root:\r\n            return False\r\n            \r\n        elif self.isSameTree(root, subRoot):\r\n             return True\r\n        else:\r\n            return self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)\r\n\r\n    def isSameTree(self, p, q):\r\n        if p == None or q == None:\r\n            return p == q\r\n        \r\n        if p.val == q.val:\r\n            return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)\r\n        else:\r\n            return False\r\n```\r\n\r\n## String compare Method\r\n\r\n### Tips:\r\n- This idea is convert all the node's val into string. Then compare if subRoot's str is in root's str.\r\n- It's more faster than below's method, the time complexity is O(m+n) which m = root's node total amounts and n = subroot's node total amounts.\r\n### Code:\r\n```python=\r\nclass Solution:\r\n    def isSubtree(self, root, subRoot) -> bool:\r\n        rootStr = self.traverse(root)\r\n        subStr = self.traverse(subRoot)\r\n        return subStr in rootStr\r\n\r\n    def traverse(self, node) -> str:\r\n        if node:\r\n            return f\"^{node.val} {self.traverse(node.left)} {self.traverse(node.right)}\"\r\n        return None\r\n```",
       "data": {
         "title": "572. Subtree of Another Tree",
