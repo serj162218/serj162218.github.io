@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Golang Basic - If and Switch Statements | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Golang Basic - If and Switch Statements</h1>
+            <p class="article-meta">
+              2023-05-10
+              
+                <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge ">
+                  Golang Basic
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p><a href="https://youtu.be/YS4e4q9oBaU?t=10080">reference source</a></p>
+<h1 id="if">If</h1>
+<pre><code class="language-java">func main() {
+	if true {
+		fmt.Println(&quot;it will print out&quot;)
+	}
+}
+</code></pre>
+<p>Curly brackets cannot be removed, even if there is only one line to execute.<br>
+.</p>
+<h3 id="initializer">initializer</h3>
+<p>If the variables is generated in this way, the scope will only be in the conditional expression.</p>
+<pre><code class="language-java">func main() {
+	classPop := map[string]int{
+		&quot;A&quot;: 55,
+		&quot;B&quot;: 37,
+	}
+	if pop, ok := classPop[&quot;A&quot;]; ok {
+		fmt.Println(pop)//55
+	}
+	fmt.Println(pop) //undefined: pop
+}
+</code></pre>
+<h3 id="conditional">Conditional</h3>
+<pre><code class="language-java">func main() {
+	number := 50
+	goal := 70
+	if number &lt; 0 || number &gt; 100 {
+		fmt.Println(&quot;number is not between 0 and 100&quot;)
+	}
+	fmt.Println(number &gt; goal, number &lt;= goal, number != goal, number == goal)
+}
+</code></pre>
+<h3 id="if-else-if-else">if else if else</h3>
+<pre><code class="language-java">func main() {
+	if ... {
+	
+	} else if ... {
+	
+	} else{
+	
+	}
+}
+</code></pre>
+<h2 id="switch">Switch</h2>
+<h3 id="no-need-to-use-break">No need to use <code>break</code></h3>
+<pre><code class="language-java">func main() {
+	num := 1
+	switch num {
+	case 1:
+		fmt.Println(1)
+	case 2:
+		fmt.Println(2)
+	case 10:
+		fmt.Println(10)
+	default:
+		fmt.Println(&quot;??&quot;)
+	}
+}
+</code></pre>
+<h3 id="comparing-multiple-values-in-one-case">Comparing multiple values in one case</h3>
+<p>Other languages, like PHP.</p>
+<pre><code class="language-php">switch ($a){
+		case 1:
+		case 2:
+		case 3:
+				print(&quot;...&quot;);
+				break;
+		...
+}
+</code></pre>
+<p>Go</p>
+<pre><code class="language-java">func main() {
+	num := 3
+	switch num {
+	case 1, 2, 3, 4:
+		fmt.Println(1, 2, 3, 4)
+	case 10:
+		fmt.Println(10)
+	default:
+		fmt.Println(&quot;??&quot;)
+	}
+}
+</code></pre>
+<h3 id="if-repeated-conditions-in-the-statements-an-error-will-be-reported">If repeated conditions in the statements, an error will be reported.</h3>
+<pre><code class="language-java">func main() {
+	num := 3
+	switch num {
+	case 1, 2, 3, 4:
+		fmt.Println(1, 2, 3, 4) //duplicate case 4 (constant of type int) in expression switch
+	case 10, 4:
+		fmt.Println(10)
+	default:
+		fmt.Println(&quot;??&quot;)
+	}
+}
+</code></pre>
+<h3 id="condition">Condition</h3>
+<p>If there are duplicates in the range, compare from top to bottom, and the first statement with true will be executed.</p>
+<pre><code class="language-java">func main() {
+	num := 5
+	switch {
+	case num &lt; 10:
+		fmt.Println(&quot;less than 10&quot;)
+	case num &lt; 20:
+		fmt.Println(&quot;less than 20&quot;)
+	default:
+		fmt.Println(&quot;??&quot;)
+	}
+}
+</code></pre>
+<h3 id="initializer-2">initializer</h3>
+<pre><code class="language-java">func main() {
+	switch num := 2 + 1; num {
+	case 1, 2, 3, 4:
+		fmt.Println(1, 2, 3, 4)
+	case 10:
+		fmt.Println(10)
+	default:
+		fmt.Println(&quot;??&quot;)
+	}
+}
+</code></pre>
+<p>Can call other functions in switch</p>
+<pre><code class="language-java">func main() {
+	switch num, _ := test(); num {
+	case 1, 2, 3, 4:
+		fmt.Println(1, 2, 3, 4)
+	case 10:
+		fmt.Println(10)
+	default:
+		fmt.Println(&quot;??&quot;)
+	}
+}
+func test() (int, bool) {
+	return 3, true
+}
+</code></pre>
+<h3 id="fallthrough">fallthrough</h3>
+<p>Even if the next layer of case does not meet the conditions, it will be executed, and there are not many opportunities to use fallthrough.</p>
+<pre><code class="language-java">func main() {
+	i := 10
+	switch {
+	case i == 10:
+		fmt.Println(10)
+		fallthrough
+	case i == 20:
+		fmt.Println(20)
+	}
+}
+//10 20
+</code></pre>
+<h3 id="switch-with-type">Switch with type</h3>
+<p>In the example, interface{} is used because interface{} can plug any type, and types can be compared in this way<br>
+If you use i := 1 or var i int = 1, it won't work, because i.(type) is an interface.</p>
+<pre><code class="language-java">func main() {
+	var i interface{} = 1
+	switch i.(type) {
+	case int:
+		fmt.Println(&quot;it is int&quot;) //print this line
+	case string:
+		fmt.Println(&quot;it is string&quot;)
+	}
+}
+</code></pre>
+<pre><code class="language-java">func main() {
+	var i interface{} = [3]int{}
+	switch i.(type) {
+	case [2]int:
+		fmt.Println(2)
+	case [3]int:
+		fmt.Println(3) //this line will print out
+	}
+}
+</code></pre>
+<h3 id="break">break</h3>
+<pre><code class="language-java">func main() {
+	i := 3
+	switch i {
+	case 1, 2, 3, 4:
+		fmt.Println(1)
+		fmt.Println(2)
+		fmt.Println(3)
+		break
+		fmt.Println(4) //won't execute but it get error with unreachable code
+									 //might be different with other compiler
+	case 5:
+		fmt.Println(5)
+	}
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">
+                <h3 class="post-title">
+                  Golang Basic - GoRoutines
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge warning">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge ">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge secondary">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge warning">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge ">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

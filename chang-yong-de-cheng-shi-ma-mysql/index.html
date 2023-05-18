@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Common used - MySQL | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Common used - MySQL</h1>
+            <p class="article-meta">
+              2022-07-13
+              
+                <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge warning">
+                  Common used
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p>創建新欄位<br>
+在TABLE內新增欄位<br>
+ALTER TABLE 資料表名稱 ADD COLUMN 欄位名稱 形態(長度);<br>
+ALTER TABLE member ADD COLUMN tg_id int(64) NOT NULL AFTER FB_id, ADD INDEX(tg_id);<br>
+在TABLE內新增欄位，欄位必須加入INDEX並且設定DEFAULT值<br>
+ALTER TABLE 資料表名稱 ADD COLUMN 欄位名稱 形態(長度), ADD INDEX(欄位名稱);</p>
+<p>刪除所有問號<br>
+UPDATE <code>test</code> SET <code>content</code>= REPLACE(content, '?', '') WHERE <code>content</code> LIKE &quot;%?%&quot;</p>
+<p>正規表達式<br>
+UPDATE <code>test</code> SET <code>msg</code>=REGEXP_REPLACE(msg,'(.<em>)( $)','\1') WHERE msg REGEXP '.</em> $'</p>
+<p>查所有外來鍵<br>
+SELECT * FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE = &quot;FOREIGN KEY&quot; AND CONSTRAINT_SCHEMA = &quot;test&quot;</p>
+<p>叢集+GROUP BY<br>
+SELECT name, subject FROM <code>student</code>, score GROUP BY name, subject</p>
+<p>範例 拿缺考的學生<br>
+SELECT name, subject FROM <code>student</code>, score WHERE (subject, name) NOT IN ( SELECT s.subject as subject, c.name as name FROM score s LEFT JOIN student c ON c.id = s.id) GROUP BY name, subject</p>
+<p>排名 DENSE_RANK()<br>
+SELECT score, DENSE_RANK() OVER (<br>
+ORDER BY score DESC<br>
+) <code>rank</code><br>
+FROM Scores ORDER BY score DESC;</p>
+<p>取第二高的薪水，沒有的話顯示null<br>
+SELECT CASE WHEN COUNT(b.c) &gt; 0 THEN b.c ELSE null END AS SecondHighestSalary<br>
+FROM (SELECT DISTINCT salary as c FROM Employee ORDER BY salary DESC LIMIT 1,1) b;</p>
+<p>//看別人的，優化版<br>
+SELECT (CASE<br>
+WHEN (SELECT COUNT(DISTINCT Salary) FROM Employee) &lt; 2<br>
+THEN NULL<br>
+ELSE (SELECT Salary FROM Employee<br>
+ORDER BY Salary DESC LIMIT 1,1)<br>
+END) AS SecondHighestSalary</p>
+<p>跳過前3筆 OFFSET<br>
+SELECT DISTINCT(salary) from Employee order by salary DESC LIMIT 1 OFFSET 3</p>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/chang-yong-de-cheng-shi-ma-git/">
+                <h3 class="post-title">
+                  Common used - git
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge secondary">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge secondary">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge success">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge warning">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge secondary">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

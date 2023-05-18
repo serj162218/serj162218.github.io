@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Telegram Bot 開發心得 | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Telegram Bot 開發心得</h1>
+            <p class="article-meta">
+              2022-07-25
+              
+                <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge success">
+                  others
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p>用telegram的bot寫了點小工具，<br>
+用Webhook的話記得php那邊要這樣接資料</p>
+<pre><code class="language-php=">// Takes raw data from the request
+$json = file_get_contents('php://input');
+// Converts it into a PHP object
+$lastMsg = json_decode($json, true);
+</code></pre>
+<p>測試的時候用getUpdates<br>
+getUpdate version</p>
+<pre><code class="language-php="> $url = &quot;https://api.telegram.org/bot.../getUpdates&quot;;
+ $s = json_decode(file_get_contents($url), true);
+ $msgList = [];
+ foreach ($s['result'] as $v) {
+     $msgList[] = $v;
+ }
+ $lastMsg = $msgList[count($msgList) - 1];
+</code></pre>
+<p>#用webhook就不能用getUpdates</p>
+<p>看Webhook有沒有異常，pending_updates不是0的話表示有異常訊息<br>
+https://api.telegram.org/bot.../getWebhookInfo</p>
+<p>清空pending_updates<br>
+https://api.telegram.org/bot.../setWebhook?url=webhook_url&amp;drop_pending_updates=true</p>
+<p>啟動webhook<br>
+https://api.telegram.org/bot.../setWebhook?url=webhook_url</p>
+<p>關閉 webhook<br>
+https://api.telegram.org/bot.../setWebhook?url=</p>
+<p>希望bot是自己私人用的，就在webhook的php那邊加上判斷來源id的部分</p>
+<pre><code class="language-php=">$allowID = [
+    &quot;ID_1&quot;,
+    &quot;ID_2&quot;
+];
+if(!in_array($lastMsg['message']['from']['id'],$allowID)) return false;
+</code></pre>
+<p>因為webhook不太好看有沒有記錄傳進來，所以我用了個資料表專門記錄傳進來的資料</p>
+<p>因為telegram的伺服器會有時差，連db的設定檔可以多這句</p>
+<pre><code class="language-php=">$GLOBALS['pdo']-&gt;prepare(&quot;SET time_zone = 'Asia/Taipei'&quot;);
+</code></pre>
+<p>程式內若有用到DateTime()，也可以靠這句改時區</p>
+<pre><code class="language-php=">$dt = new DateTime('now', new DateTimeZone('Asia/Taipei'));
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/chang-yong-de-cheng-shi-ma-javascript/">
+                <h3 class="post-title">
+                  Common used - Javascript
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge ">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge warning">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge warning">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge ">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge secondary">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

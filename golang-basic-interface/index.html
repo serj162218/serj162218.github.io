@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Golang Basic - Interface | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Golang Basic - Interface</h1>
+            <p class="article-meta">
+              2023-05-10
+              
+                <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge success">
+                  Golang Basic
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p><a href="https://youtu.be/YS4e4q9oBaU?t=17879">reference source</a></p>
+<h1 id="interface">Interface</h1>
+<p>As same as other languages, the difference between interface and struct is that interface is a declaration behavior, not a data structure.</p>
+<h2 id="example">Example</h2>
+<p>The ConsoleWriter struct implements the interface on the second line</p>
+<pre><code class="language-java">func main() {
+	var w Writer = ConsoleWriter{}
+	w.Write([]byte(&quot;hello Go!&quot;))
+}
+
+type Writer interface {
+	Write([]byte) (int, error)
+}
+
+type ConsoleWriter struct {
+}
+
+//method
+func (cw ConsoleWriter) Write(data []byte) (int, error) {
+	n, err := fmt.Println(string(data))
+	return n, err
+}
+//hello Go!
+</code></pre>
+<h2 id="name-rules">Name Rules</h2>
+<p>The naming should be related to the behavior. If there is only one behavior in the interface, name it as <code>(behavior)er</code></p>
+<pre><code class="language-java">type Writer interface {
+	Write([]byte) (int, error)
+}
+</code></pre>
+<h2 id="if-there-is-a-method-it-can-be-implemented-as-an-interface">If there is a method, it can be implemented as an interface</h2>
+<pre><code class="language-java">func main() {
+	myInt := IntCounter(0)
+	var inc Incrementer = &amp;myInt
+	for i := 0; i &lt; 3; i++ {
+		fmt.Println(inc.Increment())
+	}
+}
+
+type Incrementer interface {
+	Increment() int
+}
+
+type IntCounter int
+
+func (ic *IntCounter) Increment() int {
+	*ic++
+	return int(*ic)
+}
+
+1
+2
+3
+</code></pre>
+<h2 id="classic-example">Classic Example</h2>
+<p>After merging the two interfaces, use struct to implement</p>
+<pre><code class="language-java">func main() {
+	var wc WriterCloser = NewBufferedWriterCloser()
+	wc.Write([]byte(&quot;Hello World, this is a test&quot;))
+	wc.Close()
+}
+
+type Writer interface {
+	Write([]byte) (int, error)
+}
+type Closer interface {
+	Close() error
+}
+
+type WriterCloser interface {
+	Writer
+	Closer
+}
+
+type BufferedWriterCloser struct {
+	buffer *bytes.Buffer
+}
+
+func (bwc *BufferedWriterCloser) Write(data []byte) (int, error) {
+	n, err := bwc.buffer.Write(data)
+	if err != nil {
+		return 0, err
+	}
+	//Read 8 bytes at a time until the length is less than 8
+	v := make([]byte, 8)
+	for bwc.buffer.Len() &gt; 8 {
+		_, err := bwc.buffer.Read(v)
+		if err != nil {
+			return 0, err
+		}
+		_, err = fmt.Println(string(v))
+		if err != nil {
+			return 0, err
+		}
+	}
+	return n, nil
+}
+
+//Read the remaining byte
+func (bwc *BufferedWriterCloser) Close() error {
+	for bwc.buffer.Len() &gt; 0 {
+		data := bwc.buffer.Next(8)
+		_, err := fmt.Println(string(data))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+//Return the pointer
+func NewBufferedWriterCloser() *BufferedWriterCloser {
+	return &amp;BufferedWriterCloser{
+		buffer: bytes.NewBuffer([]byte{}),
+	}
+}
+
+Hello Wo
+rld, thi
+s is a t
+est
+</code></pre>
+<h2 id="type-conversion">Type Conversion</h2>
+<pre><code class="language-java">func main() {
+	var wc WriterCloser = NewBufferedWriterCloser()
+	wc.Write([]byte(&quot;Hi&quot;))
+	wc.Close()
+	
+	//bwc is no longer WriterCloser but BufferedWriterCloser
+	bwc := wc.(*BufferedWriterCloser)
+	fmt.Println(bwc)
+}
+
+Hi
+&amp;{0xc0000241b0}
+</code></pre>
+<h3 id="to-avoid-type-conversion-error">To avoid type conversion error</h3>
+<p>instead of doing this then use recover</p>
+<pre><code class="language-java">func main() {
+	var wc WriterCloser = NewBufferedWriterCloser()
+	wc.Write([]byte(&quot;Hi&quot;))
+	wc.Close()
+
+	bwc := wc.(io.Reader)
+	fmt.Println(bwc)
+}
+
+Hi
+panic: interface conversion: *main.BufferedWriterCloser is not io.Reader: missing method Read
+</code></pre>
+<p>we can doing this</p>
+<pre><code class="language-java">func main() {
+	var wc WriterCloser = NewBufferedWriterCloser()
+	wc.Write([]byte(&quot;Hi&quot;))
+	wc.Close()
+
+	r, ok := wc.(io.Reader)
+	if ok {
+		fmt.Println(r)
+	} else {
+		fmt.Println(&quot;Conversion failed&quot;)
+	}
+}
+
+Hi
+Conversion failed
+</code></pre>
+<h3 id="change-the-above-example-to-return-value">Change the above example to return value.</h3>
+<pre><code class="language-java">func main() {
+	var wc WriterCloser = NewBufferedWriterCloser()
+	wc.Write([]byte(&quot;Hillo owworowro&quot;))
+	wc.Close()
+
+	r, ok := wc.(BufferedWriterCloser)
+	if ok {
+		fmt.Println(r)
+	} else {
+		fmt.Println(&quot;Conversion failed&quot;)
+	}
+}
+
+type Writer interface {
+	Write([]byte) (int, error)
+}
+type Closer interface {
+	Close() error
+}
+
+type WriterCloser interface {
+	Writer
+	Closer
+}
+
+type BufferedWriterCloser struct {
+	buffer *bytes.Buffer
+}
+
+func (bwc BufferedWriterCloser) Write(data []byte) (int, error) {
+	n, err := bwc.buffer.Write(data)
+	if err != nil {
+		return 0, err
+	}
+	v := make([]byte, 8)
+	for bwc.buffer.Len() &gt; 8 {
+		_, err := bwc.buffer.Read(v)
+		if err != nil {
+			return 0, err
+		}
+		_, err = fmt.Println(string(v))
+		if err != nil {
+			return 0, err
+		}
+	}
+	return n, nil
+}
+
+func (bwc BufferedWriterCloser) Close() error {
+	for bwc.buffer.Len() &gt; 0 {
+		data := bwc.buffer.Next(8)
+		_, err := fmt.Println(string(data))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func NewBufferedWriterCloser() BufferedWriterCloser {
+	return BufferedWriterCloser{
+		buffer: bytes.NewBuffer([]byte{}),
+	}
+}
+</code></pre>
+<h2 id="interface-with-no-method">Interface with no method</h2>
+<p>It is very useful when testing the type of a variable. You can only declare an empty interface and you can always convert the type.<br>
+Because it is an empty interface, it cannot perform any behavior.</p>
+<h3 id="example-1">example 1</h3>
+<pre><code class="language-java">func main(){
+	var wc interface{} = NewBufferedWriterCloser()
+}
+type Writer interface {}
+</code></pre>
+<h3 id="example-2">example 2</h3>
+<p>An empty interface may hold values of any type. (Every type implements at least zero methods.)</p>
+<p>Empty interfaces are used by code that handles values of unknown type. For example, <code>fmt.Print</code> takes any number of arguments of type <code>interface{}</code>.</p>
+<pre><code class="language-java">func main() {
+	var i interface{}
+	describe(i)
+
+	i = 42
+	describe(i)
+
+	i = &quot;hello&quot;
+	describe(i)
+}
+
+func describe(i interface{}) {
+	fmt.Printf(&quot;(%v, %T)\n&quot;, i, i)
+}
+
+(&lt;nil&gt;, &lt;nil&gt;)
+(42, int)
+(hello, string)
+</code></pre>
+<h3 id="example-3">example 3</h3>
+<p>Anything can be put into an empty interface, even primitive types</p>
+<pre><code class="language-java">func main() {
+	var myObj interface{} = NewBufferedWriterCloser()
+	if wc, ok := myObj.(WriterCloser); ok {
+		wc.Write([]byte(&quot;Hillo owworowro&quot;))
+		wc.Close()
+	}
+	r, ok := myObj.(BufferedWriterCloser)
+	if ok {
+		fmt.Println(r)
+	} else {
+		fmt.Println(&quot;Conversion failed&quot;)
+	}
+	myObj = 5
+	fmt.Printf(&quot;%T %v&quot;, myObj, myObj)
+}
+
+Hillo ow
+worowro
+{0xc0000241b0}
+int 5
+</code></pre>
+<h2 id="pointer-receiver-value-receiver">Pointer receiver / Value receiver</h2>
+<h3 id="example-1-2">example 1</h3>
+<p>Line 2 is to pass the value of myWriterReader, so lines 20 and 21 must be value type</p>
+<pre><code class="language-java">func main() {
+	var m WriterReader = myWriterReader{}
+	fmt.Println(m)
+}
+
+type Writer interface {
+	Write()
+}
+type Reader interface {
+	Read()
+}
+
+type WriterReader interface {
+	Writer
+	Reader
+}
+
+type myWriterReader struct{}
+
+func (m myWriterReader) Write() {}
+func (m myWriterReader) Read()  {}
+</code></pre>
+<h3 id="example-2-2">example 2</h3>
+<p>Line 2 pass a pointer type, then 20 21 can be either value or pointer.</p>
+<pre><code class="language-java">func main() {
+	var m WriterReader = &amp;myWriterReader{}
+	fmt.Println(m)
+}
+
+type Writer interface {
+	Write()
+}
+type Reader interface {
+	Read()
+}
+
+type WriterReader interface {
+	Writer
+	Reader
+}
+
+type myWriterReader struct{}
+
+func (m *myWriterReader) Write() {}
+func (m myWriterReader) Read() {}
+</code></pre>
+<h2 id="best-practice">Best Practice</h2>
+<ul>
+<li>Use many, small interface with one performance
+<ul>
+<li>Single method interfaces are some of the most powerful and flexible
+<ul>
+<li>io.Writer, io.Reader, interface{}</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Don’t export interfaces for types that will be consumed
+<ul>
+<li>Instead of export interface, it is better to export concrete type, so that you can define the interface you want for testing.</li>
+<li>If a package exports the behavior of A B C with interface, it needs to implement A B C, but C behavior may not be used, so it will look better to export struct at this time, and then write an interface with A B to receive it.</li>
+</ul>
+</li>
+<li>Do export interfaces for types that will be used by package
+<ul>
+<li>If you’re creating a library that other people are going to consume, you can define the interface that you accept. And then they can provide whatever implementations that  they want.</li>
+</ul>
+</li>
+<li>Design functions and methods to receive interfaces whenever possible</li>
+</ul>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">
+                <h3 class="post-title">
+                  Golang Basic - If and Switch Statements
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge ">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge success">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge success">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge secondary">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge secondary">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge warning">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

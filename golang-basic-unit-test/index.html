@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Golang Basic - Unit test | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Golang Basic - Unit test</h1>
+            <p class="article-meta">
+              2023-05-19
+              
+                <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge success">
+                  Golang Basic
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <h1 id="unit-test">Unit test</h1>
+<blockquote>
+<p>If it's difficult to write the test, you might consider to break down the function into pieces.</p>
+</blockquote>
+<h2 id="initialize-before-test">Initialize before test</h2>
+<p>If it need to initalize first like connecting database, we can create a <code>main_test.go</code> then wrote this below.</p>
+<pre><code class="language-java">    func TestMain(m *testing.M) {
+        initializer.Initialize()
+        code := m.Run()
+        os.Exit(code)
+    }
+</code></pre>
+<h2 id="testing-the-route">Testing the route</h2>
+<p>If we want to testing route which used gin. We can create a router, then use <code>httptest.NewRecorder()</code> to test this route.</p>
+<pre><code class="language-java">	//set a router
+	router := gin.Default()
+	router.POST(&quot;/register&quot;, controller.Register)
+
+	//create a request with a body with JSON
+	user := model.User{
+		ID:       &quot;test&quot;,
+		Email:    &quot;test@example.com&quot;,
+		Password: &quot;123456&quot;,
+	}
+	requestBody, _ := json.Marshal(user)
+	req, _ := http.NewRequest(&quot;POST&quot;, &quot;/register&quot;, bytes.NewBuffer(requestBody))
+    // Set the header
+	req.Header.Set(&quot;Content-Type&quot;, &quot;application/json&quot;)
+
+    //Recorder
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, req)
+</code></pre>
+<blockquote>
+<p>Remember that if the route is for register or something, you need to delete the test data after the test.</p>
+</blockquote>
+<h2 id="example-for-unit-test">Example for Unit test</h2>
+<h3 id="simple-test">Simple test</h3>
+<pre><code class="language-java">func TestVerifyToken(t *testing.T) {
+	token := &quot;eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJJRCI6InRlc3QiLCJFbWFpbCI6InRlc3RAZXhhbXBsZS5jb20ifQ.F8jgR95R3FAs6L1Cn4-eZpLv7N2tKJ7r5VmuqBDYD6k&quot;
+	secretKey := []byte(&quot;test-key&quot;)
+
+	result, err := helper.VerifyToken(token, secretKey)
+
+	if err != nil {
+		t.Errorf(&quot;expect no error, but got %v&quot;, err)
+	}
+
+	if !result.Valid {
+		t.Errorf(&quot;expect result is valided&quot;)
+	}
+
+	claims, ok := result.Claims.(jwt.MapClaims)
+	if !ok {
+		t.Errorf(&quot;expect result claims to be MapClaims&quot;)
+	}
+
+	if claims[&quot;Email&quot;] != &quot;test@example.com&quot; {
+		t.Errorf(&quot;expect result Email to be test@example.com&quot;)
+	}
+	if claims[&quot;ID&quot;] != &quot;test&quot; {
+		t.Errorf(&quot;expect result ID to be test&quot;)
+	}
+}
+</code></pre>
+<h3 id="route-test">Route test</h3>
+<pre><code class="language-java">func TestUserRegister(t *testing.T) {
+	//set a router
+	router := gin.Default()
+	router.POST(&quot;/register&quot;, controller.UserRegister)
+
+	//create a request with a body with JSON
+	user := model.User{
+		ID:       &quot;test&quot;,
+		Email:    &quot;test@example.com&quot;,
+		Password: &quot;123456&quot;,
+	}
+	requestBody, _ := json.Marshal(user)
+	req, _ := http.NewRequest(&quot;POST&quot;, &quot;/register&quot;, bytes.NewBuffer(requestBody))
+	req.Header.Set(&quot;Content-Type&quot;, &quot;application/json&quot;)
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, req)
+
+	// Check the status code is what we expect.
+	if status := recorder.Code; status != http.StatusOK {
+		t.Errorf(&quot;handler returned wrong status code: got %v want %v&quot;,
+			status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	expectedResponse := `{&quot;message&quot;:&quot;User registered&quot;}`
+	if recorder.Body.String() != expectedResponse {
+		t.Errorf(&quot;handler returned unexpected body: got %v want %v&quot;,
+			recorder.Body.String(), expectedResponse)
+	}
+
+	//Remember that this function is for register. So we need to delete user after testing.
+	initializer.DB.Exec(&quot;DELETE FROM users WHERE id = 'test'&quot;)
+}
+</code></pre>
+<h3 id="test-with-redis">Test with Redis</h3>
+<pre><code class="language-java">/**
+ * Test that is the token add into black list successfully
+ * Remember to delete the token from redis after the test is done
+ */
+func TestAddTokenToBlacklist(t *testing.T) {
+	token := &quot;test token&quot;
+	result := model.AddTokenToBlacklist(token)
+	if result != nil {
+		t.Errorf(&quot;expected no error, but got %v&quot;, result)
+	}
+	isExist, err := initializer.RDB.SIsMember(context.Background(), &quot;black_list&quot;, token).Result()
+	if err != nil {
+		t.Errorf(&quot;expected no error, but got %v&quot;, err)
+	}
+	if isExist != true {
+		t.Errorf(&quot;expected %v, but got %v&quot;, true, isExist)
+	}
+	initializer.RDB.SRem(context.Background(), &quot;black_list&quot;, token)
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/golang-basic-variables/">
+                <h3 class="post-title">
+                  Golang Basic - Variables
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge secondary">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge warning">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge success">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge warning">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge ">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

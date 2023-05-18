@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Golang Basic - Array &amp; Slice | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Golang Basic - Array &amp; Slice</h1>
+            <p class="article-meta">
+              2023-05-10
+              
+                <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+                  Golang Basic
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p><a href="https://youtu.be/YS4e4q9oBaU?t=6473">reference source</a></p>
+<h1 id="array">Array</h1>
+<h2 id="can-only-store-one-type-of-data">Can only store one type of data</h2>
+<pre><code class="language-java">func main() {
+	grades := [4]int{95, 88, 37}
+	var names [3]string
+	names[0] = &quot;John&quot;
+	fmt.Printf(&quot;%v&quot;, grades) //[95 88 37 0]
+	fmt.Printf(&quot;%v&quot;, names) //[John  ]
+}
+</code></pre>
+<h2 id="non-declaration-can-also-use-like-this">non-declaration can also use like this.</h2>
+<pre><code class="language-java">func main() {
+	grades := [...]int{97, 85, 93}
+	fmt.Printf(&quot;%v&quot;, grades) //[97 85 93]
+}
+</code></pre>
+<h2 id="len-length-of-array-btw-length-of-string-is-the-same-function">len(): Length of array (btw, length of string is the same function)</h2>
+<pre><code class="language-java">func main() {
+	grades := [4]int{97, 85, 93}
+	fmt.Printf(&quot;%v %v&quot;, len(grades)) //4
+}
+</code></pre>
+<h2 id="two-dimension-array">two-dimension array</h2>
+<pre><code class="language-java">func main() {
+	var names [3]string = [3]string{&quot;John&quot;, &quot;Smith&quot;, &quot;Jenny&quot;}
+	var grades [3][1]int = [3][1]int{[1]int{13}, [1]int{22}, [1]int{67}}
+	fmt.Printf(&quot;%v %v&quot;, names, grades) //[John Smith Jenny] [[13] [22] [67]]
+}
+</code></pre>
+<h2 id="copy-array-in-go-is-different-with-other-languages-its-deep-copy">Copy array in go is different with other languages. It’s deep copy.</h2>
+<pre><code class="language-java">func main() {
+	a := [...]int{1, 2, 3}
+	b := a
+	b[1] = 4
+	fmt.Printf(&quot;%v %v&quot;, a, b) //[1 2 3] [1 4 3]
+}
+</code></pre>
+<h2 id="only-if-assign-by-pointer-its-acting-like-shallow-copy">Only if assign by pointer, it’s acting like shallow copy</h2>
+<pre><code class="language-java">func main() {
+	a := [...]int{1, 2, 3}
+	b := &amp;a
+	b[0] = 4
+	fmt.Printf(&quot;%v %v %v&quot;, a, b, *b) //[4 2 3] &amp;[4 2 3] [4 2 3]
+}
+</code></pre>
+<h1 id="slice">Slice</h1>
+<p>*arraylist</p>
+<h2 id="it-is-very-similar-to-array-but-there-is-no-need-to-preset-the-length-when-creating">It is very similar to Array, but there is no need to preset the length when creating</h2>
+<pre><code class="language-java">func main() {
+	a := []int{1, 2, 3}
+	fmt.Printf(&quot;%v&quot;, a) //[1 2 3]
+}
+</code></pre>
+<h2 id="in-most-cases-what-array-can-do-slice-can-do-the-same">In most cases, what Array can do, Slice can do the same</h2>
+<pre><code class="language-java">func main() {
+	a := []int{1, 2, 3}
+	fmt.Printf(&quot;%v %v&quot;, a, len(a)) //[1 2 3] 3
+}
+</code></pre>
+<h2 id="slice-is-shallow-copy-which-is-different-from-array">Slice is shallow copy, which is different from Array</h2>
+<pre><code class="language-java">func main() {
+	a := []int{1, 2, 3}
+	b := a
+	b[1] = 5
+	fmt.Printf(&quot;%v %v&quot;, a, b) //[1 5 3] [1 5 3]
+}
+</code></pre>
+<h2 id="cap-take-the-capacity-of-the-slice-which-is-usually-similar-to-len">cap(): Take the capacity of the slice, which is usually similar to len()</h2>
+<pre><code class="language-java">func main() {
+	a := []int{1, 2, 3, 4}
+	fmt.Printf(&quot;%v %v&quot;, len(a), cap(a)) //4 4
+}
+</code></pre>
+<h2 id="slice-operation-just-like-slice-in-other-languages-array-can-also-use-slice-operation-but-both-of-them-are-shallow-copy">Slice operation, just like slice() in other languages. Array can also use slice operation, but both of them are shallow copy.</h2>
+<pre><code class="language-java">func main() {
+	a := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	b := a[:] //all
+	c := a[3:] //from 4th
+	d := a[:6] //first 6 elements
+	e := a[3:6] //from 4th, to 6th
+	fmt.Println(a) //[1 2 3 4 5 6 7 8 9 10]
+	fmt.Println(b) //[1 2 3 4 5 6 7 8 9 10]
+	fmt.Println(c) //[4 5 6 7 8 9 10]
+	fmt.Println(d) //[1 2 3 4 5 6]
+	fmt.Println(e) //[4 5 6]
+	a[5] = 11
+	fmt.Println(d) //[1 2 3 4 5 11]
+}
+</code></pre>
+<h2 id="make-param-first-is-the-type-second-is-the-len-third-is-the-capacity">make(), param first is the type, second is the len, third is the capacity.</h2>
+<pre><code class="language-java">func main() {
+	a := make([]int, 3, 100)
+	fmt.Println(a) //[0 0 0]
+	fmt.Printf(&quot;len: %v\n&quot;, len(a)) //3
+	fmt.Printf(&quot;cap: %v\n&quot;, cap(a)) //100
+}
+</code></pre>
+<p>Slice is like an Array with no length limit. The capacity means that when Slice adds elements to exceed this capacity, it will automatically move all the elements to the new memory.</p>
+<p>If there are too many elements in the slice, this operation is very expensive, so that when using make() to declare, if you know that the slice has more elements, you will set a higher number for the capacity</p>
+<pre><code class="language-java">func main() {
+	a := []int{}
+	fmt.Printf(&quot;%v\n&quot;, len(a)) //0
+	fmt.Printf(&quot;%v\n&quot;, cap(a)) //0
+	a = append(a, 1, 2, 3)
+	fmt.Printf(&quot;%v\n&quot;, len(a)) //3
+	fmt.Printf(&quot;%v\n&quot;, cap(a)) //3 (different compile may not be the same)
+}
+</code></pre>
+<pre><code class="language-java">func main() {
+	a := make([]int, 0, 5)
+	fmt.Printf(&quot;%v\n&quot;, len(a)) //0
+	fmt.Printf(&quot;%v\n&quot;, cap(a)) //5
+	a = append(a, 1, 2, 3)
+	fmt.Printf(&quot;%v\n&quot;, len(a)) //3
+	fmt.Printf(&quot;%v\n&quot;, cap(a)) //5
+}
+</code></pre>
+<h1 id="spread-operater">Spread Operater</h1>
+<pre><code class="language-java">func main() {
+	a := make([]int, 0, 5)
+	a = append(a, 1)
+	a = append(a, []int{2, 3, 4, 5}...) //spead operater, will unpacked the array or slice
+	fmt.Println(a)
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/180-consecutive-numbers-sql/">
+                <h3 class="post-title">
+                  180. Consecutive Numbers (SQL)
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge ">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge secondary">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge ">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge warning">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge success">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge ">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

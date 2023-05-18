@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Golang Basic - Constants | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Golang Basic - Constants</h1>
+            <p class="article-meta">
+              2023-05-10
+              
+                <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+                  Golang Basic
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p><a href="https://youtu.be/YS4e4q9oBaU?t=5189">reference source</a></p>
+<h1 id="constants">Constants</h1>
+<h2 id="declaration">Declaration</h2>
+<pre><code class="language-java">func main() {
+	const myConst ...
+	//Not MYCONST because it will be exported (variable name rules)
+}
+</code></pre>
+<p>It won't get error if you declare a const variable then not use it.</p>
+<pre><code class="language-java">func main() {
+	const a = 5
+	const b = 6
+	fmt.Printf(&quot;%v %T\n&quot;, a, a)
+}
+//no error
+</code></pre>
+<h2 id="type-constant">Type Constant</h2>
+<p>const is like var, but const cannot be modified</p>
+<pre><code class="language-java">func main() {
+	const myConst int = 42
+	fmt.Printf(&quot;%v %T\n&quot;, myConst, myConst)
+	myConst = 66 //cannot assign to myConst (constant 42 of type int)
+}
+</code></pre>
+<p>If the value of constant is defined at runtime, it cannot be declared</p>
+<pre><code class="language-java">func main() {
+	const myConst float64 = math.Sin(1.57) //math.Sin(1.57) (value of type float64) is not constant
+	const b int = test() //b() (value of type int) is not constant
+	fmt.Printf(&quot;%v %T\n&quot;, myConst, myConst)
+}
+func test() int {
+	return 30
+}
+</code></pre>
+<p>Array (collection) is mutable, so it cannot be declared as constant<br>
+Constant can be shadowed</p>
+<pre><code class="language-java">const a int16 = 33
+const b int16 = 31
+
+func main() {
+	const a int8 = 3
+	var b int8 = 5
+	fmt.Printf(&quot;%v %T\n&quot;, a, a) //3 int8
+	fmt.Printf(&quot;%v %T\n&quot;, b, b) //5 int8
+}
+</code></pre>
+<p>There is actually no need to add a type (non-declaration) when const is declared</p>
+<pre><code class="language-java">func main() {
+	const a = 3
+	fmt.Printf(&quot;%v %T\n&quot;, a, a) //3 int
+}
+</code></pre>
+<p>What's interesting about non-declaration is that although different types of integer can't be added together, the compiler will judge by itself and change the type.<br>
+This behavior is what var does not have in non-declaration.</p>
+<pre><code class="language-java">func main() {
+	const a = 3
+	var b int16 = 688
+	fmt.Printf(&quot;%v %T\n&quot;, a+b, a+b) //691 int16
+}
+</code></pre>
+<p>The compiler will automatically convert type.</p>
+<pre><code class="language-java">func main() {
+	const a = 42
+	var b int16 = 688
+	var c int8 = 55
+	fmt.Printf(&quot;%v %T\n&quot;, a+b, a+b) //730 int16
+	fmt.Printf(&quot;%v %T\n&quot;, a+c, a+c) //97 int8
+}
+</code></pre>
+<p>counterexample</p>
+<pre><code class="language-java">func main() {
+	const a int8 = 3 //Declare the type first.
+	var b int16 = 688
+	fmt.Printf(&quot;%v %T\n&quot;, a+b, a+b) //invalid operation: a + b (mismatched types int8 and int16)
+}
+</code></pre>
+<p>The difference from var is that when using a block, if the next variable has no assigned value, the value assigned above will be used</p>
+<pre><code class="language-java">const (
+	a = 5
+	b = &quot;hello&quot;
+	c
+)
+
+func main() {
+	fmt.Printf(&quot;%v %T\n&quot;, c, c) //hello string
+}
+</code></pre>
+<h2 id="enumerated-constant">enumerated constant</h2>
+<p>iota, which can only be used for constant, is an enumeration constant (counter), starting with 0, and will be +1 every time it is declared in the constant block</p>
+<p>Does not overlap between different constant blocks</p>
+<pre><code class="language-java">const a = iota
+const (
+	b = iota
+	c
+)
+const (
+	d = iota
+)
+
+func main() {
+	fmt.Printf(&quot;%v %T\n&quot;, a, a) //0 int
+	fmt.Printf(&quot;%v %T\n&quot;, b, b) //0 int
+	fmt.Printf(&quot;%v %T\n&quot;, c, c) //1 int
+	fmt.Printf(&quot;%v %T\n&quot;, d, d) //0 int
+}
+</code></pre>
+<p>iota can use addition, subtraction, multiplication and division to do offset</p>
+<pre><code class="language-java">const (
+	a = iota + 2
+	b //iota + 2
+	c = iota - 2
+	d //iota - 2
+)
+
+func main() {
+	fmt.Printf(&quot;%v\n&quot;, a) //2
+	fmt.Printf(&quot;%v\n&quot;, b) //3
+	fmt.Printf(&quot;%v\n&quot;, c) //0
+	fmt.Printf(&quot;%v\n&quot;, d) //1
+}
+</code></pre>
+<h2 id="the-case-of-using-iota">The case of using iota</h2>
+<h3 id="give-constants-to-different-states-and-check-them-in-the-program">Give constants to different states and check them in the program</h3>
+<pre><code class="language-java">const (
+	_ = iota
+	normal
+	hard
+	veryHard
+)
+
+func main() {
+	var difficulty int = normal
+		if difficulty == normal {
+			//do something in normal difficulty
+		}
+}
+</code></pre>
+<p>Beware that iota starts from zero. If the first constant is not declared as _ (directly discarded), it usually declare as error variable.</p>
+<pre><code class="language-java">const (
+	err = iota
+	normal
+	hard
+	veryHard
+)
+
+func main() {
+	var difficulty int
+	if difficulty == error {
+		fmt.Println(&quot;error because difficulty is zero-value&quot;)
+		//this line will print out
+	}
+}
+</code></pre>
+<h3 id="bit-shifting-with-iota">bit shifting with iota</h3>
+<pre><code class="language-java">const (
+	_  = iota
+	KB = 1 &lt;&lt; (10 * iota)
+	MB
+	GB
+)
+
+func main() {
+	fileSize := 4000000000.
+	fmt.Printf(&quot;%.2fGB&quot;, fileSize/GB) //3.73GB
+}
+</code></pre>
+<h3 id="boolean-flags-for-storing-permissions">Boolean flags for Storing Permissions</h3>
+<pre><code class="language-java">const (
+	isAdmin = 1 &lt;&lt; iota
+	isMember
+	isVisitor
+
+	canSeeA
+	canSeeB
+	canSeeC
+)
+
+func main() {
+	var role byte = isAdmin | canSeeA | canSeeB
+	fmt.Printf(&quot;%b\n&quot;, role) //11001
+	if role&amp;isAdmin == isAdmin {
+			fmt.Printf(&quot;isAdmin&quot;) //will print out
+	}
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/golang-basic-channel/">
+                <h3 class="post-title">
+                  Golang Basic - Channel
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge success">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge warning">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge secondary">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge secondary">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge success">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

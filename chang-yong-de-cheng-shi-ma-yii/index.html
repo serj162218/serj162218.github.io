@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Common used - Yii | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Common used - Yii</h1>
+            <p class="article-meta">
+              2022-07-13
+              
+                <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge secondary">
+                  Common used
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <pre><code class="language-php=">    //SELECT
+    Yii::app()-&gt;db-&gt;createCommand(&quot;SELECT * FROM test WHERE id = 1&quot;)-&gt;queryAll();
+    //UPDATE, DELETE, INSERT
+    Yii::app()-&gt;db-&gt;createCommand(&quot;...&quot;)-&gt;execute();
+
+    //Model Search
+    //By Attributes
+    $member = Member::model()-&gt;findByAttributes(['role' =&gt; 1]);
+    //Primary key, ex: id = 1
+    $member = Member::model()-&gt;findByPk(1);
+
+    //transaction start
+    $transaction = Yii::app()-&gt;db-&gt;beginTransaction();
+    //commit
+    $transaction-&gt;commit();
+    //rollback
+    $transaction-&gt;rollback();
+
+    //request
+    $request = app()-&gt;request;
+    //GET, default = 1
+    $id = $request-&gt;getQuery('id', '1');
+    //POST
+    //is this from post
+    if($request-&gt;isPostRequest){...}
+    //getPost, default = 1
+    $id = $request-&gt;getPost('id', '1');
+
+    //dataProvider by array data
+    $dataProvider = new CArrayDataProvider($data, [
+    'sort' =&gt; array(
+        'defaultOrder' =&gt; 'id ASC',
+        'attributes' =&gt; array(
+            &quot;id&quot;, &quot;count&quot; //可以點擊排序
+        )
+    ),
+]);
+
+//Criteria
+$criteria = new CDbCriteria;
+$criteria-&gt;addBetweenCondition('t.created_at', $dateStart, $dateEnd);
+$dataProvider = new CActiveDataProvider('tablename', [
+    'criteria' =&gt; $criteria,
+    'sort' =&gt; array(
+        'attributes' =&gt; array(
+            '*'
+        ),
+    ),
+]);
+
+</code></pre>
+<p>Model 配 GridView 要用到FK的時候<br>
+在model內命名一個public $var;<br>
+model的rules的on =&gt; search前面加上要查詢的FK</p>
+<pre><code class="language-php=">array('id, content, type', 'safe', 'on' =&gt; 'search')
+</code></pre>
+<ol>
+<li>在model內有用relations</li>
+</ol>
+<pre><code class="language-php=">$criteria-&gt;with = ['orig'];
+$criteria-&gt;compare('orig.type', $this-&gt;type, true);
+</code></pre>
+<ol start="2">
+<li>在model內沒有用relations，或其他需要join的時候</li>
+</ol>
+<pre><code class="language-php=">$criteria-&gt;join = 'LEFT JOIN member b ON b.id = t.upper';
+$criteria-&gt;compare('b.username', $this-&gt;upper_username, true);
+</code></pre>
+<p>在return的地方兩者都需要在attributes內加上排序用</p>
+<pre><code class="language-php=">return new CActiveDataProvider('ModelName', array(
+        'criteria' =&gt; $criteria,
+        'sort' =&gt; array(
+            'attributes' =&gt; array(
+                'type' =&gt; array(
+                    'asc' =&gt; 'orig.type',
+                    'desc' =&gt; 'orig.type DESC',
+                ),
+                '*',
+            ),
+        ),
+    ));
+</code></pre>
+<p>view的地方<br>
+為了可以查詢，要加上name<br>
+如果是用relations的話，沒有特別要寫html就不需要value了</p>
+<pre><code class="language-php=">[
+    'name' =&gt; 'type',
+    'type' =&gt; 'raw', //value return 的才會變html
+    'header' =&gt; '類型',
+    'headerHtmlOptions' =&gt; array(&quot;class&quot; =&gt; 'span3'),
+    'value' =&gt; function ($data)
+    {
+        return &quot;&lt;h3&gt;&quot;.$data-&gt;orig-&gt;type.&quot;&lt;/h3&gt;&quot;
+    }
+],
+</code></pre>
+<p>view的CGridView直接用relations</p>
+<pre><code class="language-php=">[
+    'header' =&gt; 'id',
+    'value' =&gt; '$data-&gt;relations-&gt;id,
+],
+</code></pre>
+<p>用toggle快速改狀態</p>
+<pre><code class="language-php=">
+&lt;?php
+Yii::app()-&gt;clientScript-&gt;registerCssFile('/include/bootstrap-toggle/css/bootstrap2-toggle.min.css');
+Yii::app()-&gt;clientScript-&gt;registerScriptFile('/include/bootstrap-toggle/js/bootstrap2-toggle.min.js');
+
+//GridView
+[
+    'header' =&gt; '已發送',
+    'type' =&gt; 'raw',
+    'value' =&gt; function ($data)
+    {
+        $check = ($data-&gt;paid == 0) ? '' : 'checked';
+        return &quot;&lt;input {$check} class='active-btn' onchange='toggleActive({$data-&gt;id})' data-toggle='toggle' data-on='Y' data-off='N' data-onstyle='success' data-offstyle='danger' type='checkbox'&gt;&quot;;
+    },
+],
+?&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+	// 修改狀態
+	function toggleActive(id) {
+		$.ajax({
+		    url: &quot;&lt;?= $this-&gt;createUrl('ToggleActive'); ?&gt;&quot;,
+		    type: &quot;POST&quot;,
+		    dataType: &quot;JSON&quot;,
+		    data: {
+		    	id:id
+		    },
+		    success: function (response) {
+		        alert((response.status == 1) ? '修改成功' : response.msg);
+		    },
+		    error: function (XMLHttpRequest, textStatus, errorThrown) {
+		        alert(XMLHttpRequest.readyState + XMLHttpRequest.status + XMLHttpRequest.responseText);
+		    },
+		});
+	}
+&lt;/script&gt;
+
+//controller的部分
+&lt;?php
+    public function actionToggleActive()
+    {
+        $request = app()-&gt;request;
+        if ($request-&gt;isPostRequest) {
+            try {
+                $id = $request-&gt;getPost('id');
+                if (!isset($id))
+                    throw new Exception('Error', 1);
+
+                $model = Member::model()-&gt;findByPk($id);
+                if (!$model)
+                    throw new Exception('查無資料', 1);
+
+                $model-&gt;status = ($model-&gt;status == 0) ? 1 : 0;
+                $model-&gt;saveAttributes(['status']);
+
+                echo json_encode([
+                    'status' =&gt; 1,
+                ]);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'status' =&gt; 0,
+                    'msg' =&gt; $e-&gt;getMessage(),
+                ]);
+            }
+        }
+    }
+    ?&gt;
+</code></pre>
+<p>accessRule</p>
+<pre><code class="language-php=">&lt;?php
+    public function accessRules()
+    {
+        return array(
+            [
+                //所有會員
+                'allow',
+                'actions' =&gt; ['a'],
+                'users' =&gt; ['*'],
+            ],
+            [
+                //登入的會員無法到登入、註冊
+                'deny',
+                'actions' =&gt; ['login', 'register'],
+                'users' =&gt; ['@'],
+                'deniedCallback' =&gt; function () {
+                    Yii::app()-&gt;controller-&gt;redirect(['/site/index']);
+                },
+            ],
+            [
+                //expression，誰適用於這個規則，配deniedCallback
+                'deny',
+                'users' =&gt; ['@'],
+                'expression' =&gt; [$this, 'isStatusNotAllowed'],
+                'deniedCallback' =&gt; function () {
+                    Yii::app()-&gt;controller-&gt;redirect(['/site/index']);
+                },
+            ],
+            [
+                //expression，也可用在allow
+                'allow',
+                'actions' =&gt; ['b'],
+                'users' =&gt; ['@'],
+                'expression' =&gt; [$this, 'isStatusAllow'],
+            ],
+            [
+                'allow',
+                'users' =&gt; ['@'],
+            ],
+            [
+                //未登入的會員
+                'allow',
+                'actions' =&gt; ['login', 'register'],
+                'users' =&gt; ['?'],
+            ],
+            [
+                //deny所有，做安全保障
+                'deny',
+                'users' =&gt; ['*'],
+                'deniedCallback' =&gt; function () {
+                    Yii::app()-&gt;controller-&gt;redirect(['/site/login']);
+                },
+            ],
+        );
+    }
+
+    protected function isStatusNotAllowed()
+    {
+        if (app()-&gt;user-&gt;isGuest) return false;
+        $notAllowed = [...];
+        $member = Member::model()-&gt;findByAttributes(['id' =&gt; app()-&gt;user-&gt;id]);
+        return in_array($member-&gt;status, $notAllowed);
+    }
+
+    protected function isStatusAllow()
+    {
+        $member = Member::model()-&gt;findByAttributes(['id' =&gt; app()-&gt;user-&gt;id]);
+        return !$member-&gt;status == Member::STATUS_ALLOW;
+    }
+?&gt;
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/kill-9-vs-kill-15/">
+                <h3 class="post-title">
+                  kill -9 v.s. kill -15
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge success">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge warning">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge secondary">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge secondary">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge warning">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

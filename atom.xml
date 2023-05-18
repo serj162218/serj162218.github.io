@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://serj162218.github.io/</id>
+    <title>AnnieMeow</title>
+    <updated>2023-05-18T18:33:02.593Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://serj162218.github.io/"/>
+    <link rel="self" href="https://serj162218.github.io/atom.xml"/>
+    <subtitle>A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.</subtitle>
+    <logo>https://serj162218.github.io/images/avatar.png</logo>
+    <icon>https://serj162218.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2023, AnnieMeow</rights>
+    <entry>
+        <title type="html"><![CDATA[Golang Basic - Unit test]]></title>
+        <id>https://serj162218.github.io/golang-basic-unit-test/</id>
+        <link href="https://serj162218.github.io/golang-basic-unit-test/">
+        </link>
+        <updated>2023-05-18T18:09:40.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Golang Basic - Variables]]></title>
+        <id>https://serj162218.github.io/golang-basic-variables/</id>
+        <link href="https://serj162218.github.io/golang-basic-variables/">
+        </link>
+        <updated>2023-05-10T13:25:31.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Golang Basic - Struct]]></title>
+        <id>https://serj162218.github.io/golang-basic-struct/</id>
+        <link href="https://serj162218.github.io/golang-basic-struct/">
+        </link>
+        <updated>2023-05-10T13:18:43.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Golang Basic - Primitives]]></title>
+        <id>https://serj162218.github.io/golang-basic-primitives/</id>
+        <link href="https://serj162218.github.io/golang-basic-primitives/">
+        </link>
+        <updated>2023-05-10T13:14:01.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Golang Basic - Pointers]]></title>
+        <id>https://serj162218.github.io/golang-basic-pointers/</id>
+        <link href="https://serj162218.github.io/golang-basic-pointers/">
+        </link>
+        <updated>2023-05-10T13:09:47.000Z</updated>
+    </entry>
+</feed>

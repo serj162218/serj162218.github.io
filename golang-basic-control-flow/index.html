@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Golang Basic - Control Flow | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Golang Basic - Control Flow</h1>
+            <p class="article-meta">
+              2023-05-10
+              
+                <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge ">
+                  Golang Basic
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p><a href="https://youtu.be/YS4e4q9oBaU?t=13294">reference source</a></p>
+<h1 id="control-flow">Control Flow</h1>
+<h2 id="defer">Defer</h2>
+<h3 id="do-it-until-it-is-time-to-return">Do it until it is time to return.</h3>
+<pre><code class="language-java">func main() {
+	fmt.Println(&quot;start&quot;)
+	defer fmt.Println(&quot;middle&quot;)
+	fmt.Println(&quot;end&quot;)
+}
+
+start
+end
+middle
+</code></pre>
+<h3 id="defer-is-lifo-just-like-stack">defer is LIFO, just like stack</h3>
+<pre><code class="language-java">func main() {
+	defer fmt.Println(&quot;start&quot;)
+	defer fmt.Println(&quot;middle&quot;)
+	defer fmt.Println(&quot;end&quot;)
+}
+
+end
+middle
+start
+</code></pre>
+<p>Because defer is not executed until the end of the function, if it is used in the loop, it may cause a large amount of memory to be unable to be released until the end of the function, not the end of the loop.</p>
+<pre><code class="language-java">func main() {
+	for i := 0; i &lt; 2; i++ {
+		defer fmt.Println(&quot;defer&quot;, i)
+		fmt.Println(&quot;normal&quot;, i)
+	}
+	fmt.Println(&quot;AA&quot;)
+}
+
+normal 0
+normal 1
+AA
+defer 1
+defer 0
+</code></pre>
+<p>If you want to use defer functions in the loop, such as releasing resources after fetch api, you can put them in a new function.</p>
+<pre><code class="language-java">func main() {
+	for i := 0; i &lt; 2; i++ {
+		test(i)
+	}
+	fmt.Println(&quot;AA&quot;)
+}
+func test(i int) {
+	defer fmt.Println(&quot;defer&quot;, i)
+	fmt.Println(&quot;normal&quot;, i)
+}
+
+normal 0
+defer 0
+normal 1
+defer 1
+AA
+</code></pre>
+<h3 id="the-variables-in-defer-are-taken-at-the-moment-not-before-return">The variables in defer are taken at the moment, not before return</h3>
+<pre><code class="language-java">func main() {
+		a := 1
+		defer fmt.Println(a)
+		a = 2
+}
+
+1
+</code></pre>
+<h2 id="panic-exception">Panic (exception)</h2>
+<p>Panic is not necessarily a fatal error, as long as the application knows how to deal with panic, otherwise the program will be stopped.</p>
+<pre><code class="language-java">func main() {
+	fmt.Println(&quot;start&quot;)
+	panic(&quot;nono&quot;)
+	fmt.Println(&quot;end&quot;)
+}
+
+start
+panic: nono
+</code></pre>
+<h3 id="interaction-between-panic-and-defer">Interaction between panic and defer</h3>
+<p>defer will be executed before return, and panic will cause the application to end, so defer will be executed before panic.</p>
+<pre><code class="language-java">func main() {
+	fmt.Println(&quot;start&quot;)
+	defer fmt.Println(&quot;deffered&quot;)
+	panic(&quot;nono&quot;)
+	fmt.Println(&quot;end&quot;)
+}
+
+start
+deffered
+panic: nono
+</code></pre>
+<h2 id="recover">Recover</h2>
+<p>Before reading recover, you must first know how to write anonymous functions</p>
+<h3 id="callback-anonymous-function">callback &amp; anonymous function</h3>
+<p>func(){...}() is an anonymous function, the front is written as func (like callback), and the back () means to be executed</p>
+<pre><code class="language-java">func main() {
+	test(func() { fmt.Println(123) })
+}
+func test(a func()) {
+	a()
+}
+
+123
+</code></pre>
+<h3 id="now-use-recover-inside-the-anonymous-function">Now use recover() inside the anonymous function</h3>
+<p>Because defer will be executed before panic, it means that Exception has already occurred. If there is no exception, recover will return nil.</p>
+<pre><code class="language-java">func main() {
+	fmt.Println(&quot;start&quot;)
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(&quot;Error:&quot;, err)
+		}
+	}()
+	panic(&quot;nono&quot;)
+	fmt.Println(&quot;end&quot;)
+}
+
+start
+Error: nono
+</code></pre>
+<h3 id="stack-function">stack function</h3>
+<p>As long as the panic has a recover to catch it, the higher-level function will not interrupt the execution due to the panic, but the function of the panic itself will be interrupted.</p>
+<pre><code class="language-java">func main() {
+	fmt.Println(&quot;start&quot;)
+	test()
+	fmt.Println(&quot;end&quot;)
+}
+func test() {
+	fmt.Println(&quot;start test&quot;)
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(&quot;Error:&quot;, err)
+		}
+	}()
+	panic(&quot;nono&quot;)
+	fmt.Println(&quot;end test&quot;)
+}
+
+start
+start test
+Error: nono
+end
+</code></pre>
+<h3 id="throw-new-exception-in-recover">Throw new exception in recover</h3>
+<p>If the error cannot be handled with recover(), you can use panic() again and throw the exception to the upper function.</p>
+<pre><code class="language-java">func main() {
+	fmt.Println(&quot;start&quot;)
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(&quot;Error from test:&quot;, err)
+		}
+	}()
+	test()
+	fmt.Println(&quot;end&quot;)
+}
+func test() {
+	fmt.Println(&quot;start test&quot;)
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(&quot;Error:&quot;, err)
+			panic(err)
+		}
+	}()
+	panic(&quot;nono&quot;)
+	fmt.Println(&quot;end test&quot;)
+}
+
+start
+start test
+Error: nono
+Error from test: nono
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/golang-basic-constants/">
+                <h3 class="post-title">
+                  Golang Basic - Constants
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge warning">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge secondary">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge success">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge warning">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge secondary">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge success">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

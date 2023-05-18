@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Maze find a way out with Javascript ( Recursion &amp; Iteration ) | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Maze find a way out with Javascript ( Recursion &amp; Iteration )</h1>
+            <p class="article-meta">
+              2022-10-14
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <h1>遞迴版本</h1>
+從0,0開始往四個方向走，用一個array去存現在走哪個方向
+如果碰到終點(maze.length-1 && maze.length -1)就代表成功了
+如果有一條遞迴的路成功了，就一直把這成功的訊息傳下去
+如果這條路失敗了，就把array剛剛存的「現在走的方向」移除掉
+最後輸出array就是答案了
+在走的時候，下一步不能是原點，也不能超出範圍
+<h1>Recursion</h1>
+Start with (0,0) (you can start with any point)
+There must be a way to exit.
+Use recursive to try any four direction, then use an array to save what directions it goes.
+If the way is return true, keep returning true until the start of the recursion.
+If the way is failed. pop out the latest array you push in.
+The next step can't be neither start point nor out of range.
+<pre><code class="language-javascript=">let findRoad = function (maze) {
+    let road = [];
+    helper(maze, road, 0, 0);
+    return road;
+}
+
+let helper = function (maze, road, i, j) {
+    if (i == maze.length - 1 &amp;&amp; j == maze[i].length - 1) return true;
+
+    /**
+     * i+1 S
+     * i-1 N
+     * j+1 E
+     *j-1 W
+     */
+
+    if (j &lt; maze[i].length - 1 &amp;&amp; maze[i][j + 1] !== 0) {
+        maze[i][j + 1] = 0;
+        road.push(&quot;E&quot;);
+        if (helper(maze, road, i, j + 1) == true) return true;
+    }
+    if (i &lt; maze.length - 1 &amp;&amp; maze[i + 1][j] !== 0) {
+        maze[i + 1][j] = 0;
+        road.push(&quot;S&quot;);
+        if (helper(maze, road, i + 1, j) == true) return true;
+    }
+    if (i &gt; 0 &amp;&amp; maze[i - 1][j] !== 0 &amp;&amp; !(i == 1 &amp;&amp; j == 0)) {
+        maze[i - 1][j] = 0;
+        road.push(&quot;N&quot;);
+        if (helper(maze, road, i - 1, j) == true) return true;
+    }
+    if (j &gt; 0 &amp;&amp; maze[i][j - 1] !== 0 &amp;&amp; !(i == 0 &amp;&amp; j == 1)) {
+        maze[i][j - 1] = 0;
+        road.push(&quot;W&quot;);
+        if (helper(maze, road, i, j - 1) == true) return true;
+    }
+    road.pop();
+}
+
+let maze = [
+    [1, 1, 1, 1, 1],
+    [0, 1, 0, 0, 1],
+    [0, 1, 0, 0, 1],
+    [0, 0, 1, 0, 1],
+    [0, 0, 1, 1, 1],
+]
+let maze2 = [
+    [1, 1, 1, 0, 1],
+    [0, 1, 0, 0, 1],
+    [0, 1, 1, 0, 1],
+    [0, 0, 1, 0, 1],
+    [0, 0, 1, 1, 1],
+];
+let maze3 = [
+    [1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0],
+    [1, 0, 1, 1, 1],
+    [1, 0, 1, 0, 1],
+    [1, 1, 1, 0, 1],
+];
+let maze4 = [
+    [1, 0, 0, 0, 1],
+    [1, 1, 1, 0, 0],
+    [1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1],
+];
+console.log(findRoad(maze));
+console.log(findRoad(maze2));
+console.log(findRoad(maze3));
+console.log(findRoad(maze4));
+</code></pre>
+<h1>迴圈</h1>
+使用array紀錄走過的路，然後用String紀錄方向
+起點先設為0(代表走過了)
+判斷四個方向中不是0的路，走過去時用array紀錄「走之前的座標」，並用String紀錄剛剛的方向，然後把「現在要走的座標」設為0代表走過了。
+當走到終點時把迴圈break掉
+如果走到死路了，因為有用array紀錄剛剛的路，所以可以回到上一個點，String也要把剛剛最後紀錄的方向刪掉。
+最後印出String就是答案了
+<h1>Iteration </h1>
+Use an array to record the road it just went, then use a string to record the directions.
+The start point is set to 0.
+Going four diections which is not 0, use array to record the position before go, then use string to record the direction. Remeber to set the point to 0, means it has passed this way.
+To break the loop if it arrive the end.
+If there's no way to go, use the latest item in array, then delete the latest char in String.
+<p>Print out the String, which is the answer.</p>
+<pre><code class="language-javascript=">let findRoad = function (maze) {
+    return helper(maze, 0, 0);
+}
+
+let helper = function (maze, i, j) {
+    let road = [];
+    let roadStr = &quot;&quot;;
+    maze[0][0] = 0;
+    while (true) {
+        if(i === maze.length - 1 &amp;&amp; j  === maze[i].length - 1) break;
+        if (i &lt; maze.length - 1 &amp;&amp; maze[i + 1][j] !== 0) {
+            road.push([i, j]);
+            roadStr += &quot;S&quot;;
+            maze[i + 1][j] = 0;
+            i++;
+        } else if (i &gt; 0 &amp;&amp; maze[i - 1][j] !== 0) {
+            road.push([i, j]);
+            roadStr += &quot;N&quot;;
+            maze[i - 1][j] = 0;
+            i--;
+        } else if (j &lt; maze[i].length - 1 &amp;&amp; maze[i][j + 1] !== 0) {
+            road.push([i, j]);
+            roadStr += &quot;E&quot;;
+            maze[i][j + 1] = 0;
+            j++;
+        } else if (j &gt; 0 &amp;&amp; maze[i][j - 1] !== 0) {
+            road.push([i, j]);
+            roadStr += &quot;W&quot;;
+            maze[i][j - 1] = 0;
+            j--;
+        } else {
+            let tmp = road.pop();
+            i = tmp[0];
+            j = tmp[1];
+            roadStr = roadStr.substring(0, roadStr.length - 1);
+        }
+    }
+    return roadStr;
+}
+
+let maze = [
+    [1, 1, 1, 1, 1],
+    [0, 1, 0, 0, 1],
+    [0, 1, 0, 0, 1],
+    [0, 0, 1, 0, 1],
+    [0, 0, 1, 1, 1],
+]
+let maze2 = [
+    [1, 1, 1, 0, 1],
+    [0, 1, 0, 0, 1],
+    [0, 1, 1, 0, 1],
+    [0, 0, 1, 0, 1],
+    [0, 0, 1, 1, 1],
+];
+let maze3 = [
+    [1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0],
+    [1, 0, 1, 1, 1],
+    [1, 0, 1, 0, 1],
+    [1, 1, 1, 0, 1],
+];
+let maze4 = [
+    [1, 0, 0, 0, 1],
+    [1, 1, 1, 0, 0],
+    [1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1],
+];
+let maze5 = [
+    [1, 0, 1, 1, 1],
+    [1, 1, 1, 0, 1],
+    [0, 0, 1, 0, 1],
+    [0, 1, 1, 0, 1],
+    [1, 1, 0, 0, 1],
+];
+console.log(findRoad(maze));
+console.log(findRoad(maze2));
+console.log(findRoad(maze3));
+console.log(findRoad(maze4));
+console.log(findRoad(maze5));
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/three-types-of-order-in-binary-tree-with-javascript/">
+                <h3 class="post-title">
+                  Three types of Order in Binary Tree with Javascript ( Iteration )
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge secondary">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge ">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge warning">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge secondary">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge secondary">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Golang Basic - Function | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Golang Basic - Function</h1>
+            <p class="article-meta">
+              2023-05-10
+              
+                <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+                  Golang Basic
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p><a href="https://youtu.be/YS4e4q9oBaU?t=15690">reference source</a></p>
+<h1 id="function">Function</h1>
+<h2 id="example">example</h2>
+<pre><code class="language-java">func test(a int, b *int) (int, bool, string) {
+	return 5, true, &quot;hello&quot;
+}
+</code></pre>
+<h3 id="params-are-same-type">params are same type</h3>
+<pre><code class="language-java">func test(a, b int, c string) {
+	
+}
+</code></pre>
+<h2 id="passing-a-pointer">Passing a pointer</h2>
+<p>Parameter can be a pointer. When a large object is passed in, the original operation will be to copy a new object, but if it is a pointer, it will save memory and speed. Be careful because it is passed in pointer, the original object will also be changed.</p>
+<h2 id="variadic-paramter">variadic paramter</h2>
+<p>Turn the parameters passed in later into slices.</p>
+<pre><code class="language-java">func main() {
+	sum(&quot;sum&quot;, 1, 2, 3, 4, 5)
+}
+func sum(a string, values ...int) {
+	fmt.Println(a, values)
+}
+
+sum [1 2 3 4 5]
+</code></pre>
+<h2 id="回傳pointer">回傳pointer</h2>
+<p>When Go finds that the returned value is about to be released, Go will put this value into shared memory, so this value will not be released, and it may not have the same behavior in other languages.</p>
+<pre><code class="language-java">func main() {
+	fmt.Println(*test())
+}
+func test() *int {
+	result := 5
+	return &amp;result
+}
+
+5
+</code></pre>
+<h2 id="name-return-value">Name return value</h2>
+<p>Create a variable in the returned parameter, and then automatically specify this variable when returning, which is a return sugar.</p>
+<pre><code class="language-java">func main() {
+	fmt.Println(test(1, 2, 3))
+}
+func test(values ...int) (result int) {
+	for _, v := range values {
+		result += v
+	}
+	return
+}
+
+6
+</code></pre>
+<h2 id="return-multiple-values">Return multiple values</h2>
+<p>It's very common in Go to return value and error</p>
+<pre><code class="language-java">func main() {
+	d, err := divide(5.0, 0.0)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(d)
+}
+
+func divide(a, b float64) (float64, error) {
+	if b == 0.0 {
+		return 0.0, fmt.Errorf(&quot;cannot divide by zero&quot;)
+	}
+	return a / b, nil
+}
+</code></pre>
+<h2 id="passing-through-anonymous-function">Passing through anonymous function</h2>
+<p>The change of the value inside will not affect the value outside, just like passing value to other function.</p>
+<pre><code class="language-java">func main() {
+	for i := 0; i &lt; 5; i++ {
+		func(i int) {
+			i++
+			fmt.Println(i)
+		}(i)
+	}
+}
+
+1
+2
+3
+4
+5
+</code></pre>
+<p>If it is written in the following way, the function does not pass any parameters, but directly takes the nearest scope variable, so the changes made inside will change the outside value.</p>
+<pre><code class="language-java">func main() {
+	for i := 0; i &lt; 5; i++ {
+		func() {
+			i++
+			fmt.Println(i)
+		}()
+	}
+}
+
+1
+3
+5
+</code></pre>
+<h3 id="create-anonymous-function-as-variable">Create anonymous function as variable</h3>
+<p>Put the anonymous function into the variable, and it can be passed to other functions</p>
+<pre><code class="language-java">func main() {
+	f := func(i int) {
+		i++
+		fmt.Println(i)
+	}
+	for i := 0; i &lt; 5; i++ {
+		f(i)
+	}
+}
+</code></pre>
+<p>Another way</p>
+<pre><code class="language-java">func main() {
+	var f func(int) = func(i int) {
+		i++
+		fmt.Println(i)
+	}
+	for i := 0; i &lt; 5; i++ {
+		f(i)
+	}
+}
+</code></pre>
+<p>With return</p>
+<pre><code class="language-java">func main() {
+	var f func(int) int = func(i int) int {
+		i++
+		fmt.Println(i)
+		return i
+	}
+	for i := 0; i &lt; 5; i++ {
+		f(i)
+	}
+}
+</code></pre>
+<h3 id="pass-in-function-execute-return">Pass in function, execute, return</h3>
+<p>Function with no return</p>
+<pre><code class="language-java">func main() {
+	execFunc(&quot;sum&quot;, func(str string, value []int) {
+		result := 0
+		for _, i := range value {
+			result += i
+		}
+		fmt.Println(result)
+	}, 1, 2, 3, 4, 5)
+
+}
+func execFunc(str string, f func(str string, value []int), value ...int) {
+	f(str, value)
+}
+</code></pre>
+<p>Function with return parameters.</p>
+<pre><code class="language-java">func main() {
+	value, err := execFunc(&quot;sum&quot;, func(str string, value []int) (int, error) {
+		if len(value) == 0 {
+			return 0, fmt.Errorf(&quot;length of values must more than 0&quot;)
+		}
+		result := 0
+		for _, i := range value {
+			result += i
+		}
+		return result, nil
+	}, 1, 2, 3, 4, 5)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(value)
+
+}
+func execFunc(str string, f func(str string, value []int) (int, error), value ...int) (int, error) {
+	return f(str, value)
+}
+
+15
+</code></pre>
+<h2 id="method">Method</h2>
+<pre><code class="language-java">func main() {
+	g := greeter{
+		greeting: &quot;Hello,&quot;,
+		name:     &quot;John&quot;,
+	}
+	g.greet()
+}
+
+type greeter struct {
+	greeting string
+	name     string
+}
+
+func (g greeter) greet() {
+	fmt.Println(g.greeting, g.name)
+}
+
+Hello, John
+</code></pre>
+<p>At line 14, the operation is the copy of the object, not the object itself, so even if it is modified, it will not affect the original value.</p>
+<pre><code class="language-java">func (g greeter) greet() {
+	fmt.Println(g.greeting, g.name)
+	g.name = &quot;Amy&quot; //ineffective assignment to field greeter.name
+}
+</code></pre>
+<p>Of course, the parameter passed in line 14 can also be a pointer, which will affect the original value.</p>
+<pre><code class="language-java">func main() {
+	g := greeter{
+		greeting: &quot;Hello,&quot;,
+		name:     &quot;John&quot;,
+	}
+	g.greet()
+	g.greet()
+}
+
+type greeter struct {
+	greeting string
+	name     string
+}
+
+func (g *greeter) greet() {
+	fmt.Println(g.greeting, g.name)
+	g.name = &quot;&quot;
+}
+
+Hello, John
+Hello,
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/golang-basic-for-loop/">
+                <h3 class="post-title">
+                  Golang Basic - For loop
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge warning">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge ">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge success">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge success">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge success">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge warning">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Golang Basic - Primitives | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Golang Basic - Primitives</h1>
+            <p class="article-meta">
+              2023-05-10
+              
+                <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge warning">
+                  Golang Basic
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p><a href="https://youtu.be/YS4e4q9oBaU?t=3425">reference source</a></p>
+<h1 id="primitives">Primitives</h1>
+<h2 id="bool">Bool</h2>
+<pre><code class="language-java">func main() {
+	var a bool = true
+	b := 1 == 1 
+	var c bool = 2 == 1
+	fmt.Printf(&quot;%v %v %v\n&quot;, a, b, c) //true true false
+}
+</code></pre>
+<h2 id="integer">Integer</h2>
+<h3 id="signed-integer">signed integer</h3>
+<table>
+<thead>
+<tr>
+<th>int8</th>
+<th>-128 ~ 127</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>int16</td>
+<td>-32 768 ~ 32 767</td>
+</tr>
+<tr>
+<td>int32</td>
+<td>-2 147 483 648 ~ 2 147 483 647</td>
+</tr>
+<tr>
+<td>int64</td>
+<td>-9 223 372 036 854 775 808 ~ 9 223 372 036 854 775 807</td>
+</tr>
+</tbody>
+</table>
+<h3 id="unsigned-integer">unsigned integer</h3>
+<table>
+<thead>
+<tr>
+<th>uint8</th>
+<th>0 ~ 255</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>uint16</td>
+<td>0 ~ 65 535</td>
+</tr>
+<tr>
+<td>uint32</td>
+<td>0 ~ 4 294 967 295</td>
+</tr>
+</tbody>
+</table>
+<h3 id="with-operator">with operator</h3>
+<pre><code class="language-java">func main() {
+	a := 10
+	b := 4
+	fmt.Println(a + b) //14
+	fmt.Println(a - b) //6
+	fmt.Println(a / b) //2
+	fmt.Println(a * b) //40
+	fmt.Println(a % b) //2
+}
+</code></pre>
+<h3 id="integers-type-cant-be-different-when-operation">Integer’s type can’t be different when operation</h3>
+<pre><code class="language-java">func main() {
+	var a int = 10
+	var b int8 = 12
+	fmt.Println(a + b)
+	//invalid operation: a + b (mismatched types int and int8)
+}
+</code></pre>
+<h3 id="bit-operators">Bit operators</h3>
+<pre><code class="language-java">func main() {
+	a := 10             //1010
+	b := 3              //0011
+	fmt.Println(a &amp; b)  //AND 0010
+	fmt.Println(a | b)  //OR 1011
+	fmt.Println(a ^ b)  //Exclusive OR 1001
+	fmt.Println(a &amp;^ b) //NAND 1000, a(1010) &amp; ^b(0011-&gt;1100), so it becomes 1010 &amp; 1100
+}
+</code></pre>
+<h3 id="bit-shifting">Bit shifting</h3>
+<pre><code class="language-java">func main() {
+	a := 4              //0100 2^2
+	fmt.Println(a &gt;&gt; 1) //0010 2^2 / 2^1
+	fmt.Println(a &lt;&lt; 2) //1000 2^2 * 2^2
+}
+</code></pre>
+<h2 id="float">Float</h2>
+<table>
+<thead>
+<tr>
+<th>float32</th>
+<th>+-1.18E-38 ~ +-3.4E38</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float64</td>
+<td>+-2.23E-308 ~ +-1.8E308</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-java">func main() {
+	n := 3.14
+	fmt.Printf(&quot;%v %T\n&quot;, n, n) //3.14 float64
+	n = 13.7e72
+	fmt.Printf(&quot;%v %T\n&quot;, n, n) //1.37e+73 float64
+	n = 2.1e14
+	fmt.Printf(&quot;%v %T\n&quot;, n, n) //2.1e+14 float64
+}
+</code></pre>
+<h2 id="complex">Complex</h2>
+<p>complex64, complex32 are numbers larger than float, used for data analysis.</p>
+<h2 id="string">String</h2>
+<p>You can treat string as an array, but when you take string[n], it will become byte, because string is actually another name for bytes in Go</p>
+<pre><code class="language-java">func main() {
+	s := &quot;hello world&quot;
+	fmt.Printf(&quot;%v, %T\n&quot;, s[2], s[2]) //108, uint8
+	fmt.Printf(&quot;%v, %T\n&quot;, string(s[2]), s[2]) //l, uint8
+}
+</code></pre>
+<p>string is immutable, and each element is byte, so it cannot be modified</p>
+<pre><code class="language-java">func main() {
+	s := &quot;hello world&quot;
+	s[2] = &quot;u&quot; //cannot assign to s[2] (value of type byte)
+	fmt.Printf(&quot;%v, %T\n&quot;, s[2], s[2])
+}
+</code></pre>
+<p>But strings can be added, after all arrays can also be added</p>
+<pre><code class="language-java">func main() {
+	a := &quot;hello &quot;
+	a = a + &quot;world&quot;
+	fmt.Printf(&quot;%v, %T\n&quot;, a, a)
+}
+</code></pre>
+<p>string can be converted into byte, it is often used between functions or when communicating with other applications.</p>
+<pre><code class="language-java">func main() {
+	a := &quot;hello world&quot;
+	b := []byte(a)
+	fmt.Printf(&quot;%v, %T\n&quot;, b, b)
+	//[104 101 108 108 111 32 119 111 114 108 100], []uint8
+}
+</code></pre>
+<h2 id="rune">Rune</h2>
+<p>string is utf8, Rune is utf32, in utf32 it can be up to 32bits, but not necessarily 32bits.</p>
+<p>Rune is another name for int32, declared in single quotes.</p>
+<p>The difference with string is that even if rune is used as the type, it is still int32.</p>
+<pre><code class="language-java">func main() {
+	var a rune = 'a'
+	b := 'b'
+	fmt.Printf(&quot;%v %T\n&quot;, a, a) //97 int32
+	fmt.Printf(&quot;%v %T\n&quot;, b, b) //98 int32
+}
+</code></pre>
+<blockquote>
+<p>To process the data stream which is encoded into utf32, you can use a api called <code>ReadRune()</code></p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">
+                <h3 class="post-title">
+                  Golang Basic - Pointers
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge secondary">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge secondary">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge success">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge warning">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge warning">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

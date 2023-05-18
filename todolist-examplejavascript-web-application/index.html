@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Todolist Example(Javascript + Web Application) | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Todolist Example(Javascript + Web Application)</h1>
+            <p class="article-meta">
+              2022-12-14
+              
+                <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge secondary">
+                  javascript
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <h2 id="introduce">Introduce</h2>
+<p>Make a simple todolist with below.</p>
+<ul>
+<li>Express</li>
+<li>Typescript</li>
+<li>Prisma</li>
+<li>gulp</li>
+<li>ejs</li>
+</ul>
+<p>app(router)<br>
+- app.ts<br>
+- config.ts<br>
+- todo.ts<br>
+prisma(orm)<br>
+- schema.prisma<br>
+views<br>
+- index.ejs<br>
+- todo.ejs<br>
+gulpfile.js</p>
+<hr>
+<h2 id="database-structure">Database structure</h2>
+<figure data-type="image" tabindex="1"><img src="https://i.imgur.com/QH9BsIg.png" alt="" loading="lazy"></figure>
+<hr>
+<h2 id="code">Code</h2>
+<h3 id="appts">app.ts</h3>
+<pre><code class="language-typescript=">import express from 'express';
+import path from 'path';
+//router from todo, separate them for scalability in future.
+import { todo } from './todo';
+
+const app = express();
+
+//view engine
+app.set('view engine', 'ejs');
+
+//bodyEncoder, using for POST from form
+app.use(express.json());
+app.use(express.urlencoded({
+    extended: true
+}));
+
+app.use(express.static(path.join(__dirname, 'public')));
+//include todo's router
+app.use('/', todo);
+
+//index
+app.get('/', async (req, res) =&gt; {
+    res.redirect('/todo');
+});
+
+//listening
+app.listen(3000, () =&gt; {
+    console.log(&quot;listening port on 3000.&quot;);
+})
+</code></pre>
+<h3 id="configts">config.ts</h3>
+<pre><code class="language-typescript=">import { PrismaClient } from '@prisma/client'
+const database = new PrismaClient();
+
+export { database };
+</code></pre>
+<h3 id="todots">todo.ts</h3>
+<pre><code class="language-typescript=">import express from 'express';
+import { database } from './config';
+
+const router = express.Router();
+
+router.get('/todo', async (req, res) =&gt; {
+    res.render('index');
+});
+
+//Separate front-end and backend
+router.get('/loadTodolist', async (req, res) =&gt; {
+    const todolist = await database.todolist.findMany();
+    res.json(todolist);
+})
+
+router.get('/todo/:id', async (req, res) =&gt; {
+    res.render('todo');
+});
+
+//API for ajax
+router.get('/loadTasks/:id', async (req, res) =&gt; {
+    //load all the tasks which are belong to this id's todolist
+    const tasks = await database.todolist.findUnique(
+        {
+            where: { id: parseInt(req.params.id) },
+            include: {
+                taskrelations:
+                {
+                    include: { taskdetails: true }
+                }
+            }
+        }
+    );
+    res.json(tasks);
+});
+
+router.post('/addTodo', async (req, res) =&gt; {
+    const name = req.body.name;
+    console.log(name);
+    const createTodolist = await database.todolist.create({
+        data: {
+            name: name,
+        }
+    });
+    res.json(createTodolist);
+});
+
+//create a new task, will also create a task's relation, Prisma is useful btw.
+router.post('/todo/:id', async (req, res) =&gt; {
+    const id = req.params.id;
+    const task = await database.taskdetails.create({
+        data: {
+            name: req.body.name,
+            finished: false,
+            taskrelations: {
+                create: [
+                    { todolist: { connect: { id: parseInt(id) } }, },
+                ]
+            }
+        }
+    });
+    res.json(task);
+});
+
+//delete the task and the task relations at the same time.
+router.delete('/todo', async (req, res) =&gt; {
+    const taskid = parseInt(req.body.id);
+
+    await database.taskdetails.delete({
+        where: {
+            id: taskid
+        },
+        include: {
+            taskrelations: true
+        }
+    });
+    res.sendStatus(200);
+});
+
+//update the task's &quot;finished&quot; attribute
+router.patch('/todo', async (req, res) =&gt; {
+    const taskid = parseInt(req.body.id);
+    const checked = req.body.checked === &quot;true&quot; ? true : false;
+    await database.taskdetails.update({
+        where: {
+            id: taskid
+        },
+        data: {
+            finished: checked
+        }
+    });
+    res.sendStatus(200);
+});
+
+export { router as todo }
+</code></pre>
+<h3 id="schemaprisma">schema.prisma</h3>
+<pre><code class="language-javascript=">/*
+ * Prisma generate a model relations by using command.
+ * I'm using mysql in this project, if you use sqlite or others, remember to change the latest word.
+ * Remember to set the settings in .env which is created by prisma itself.
+ * npx prisma init --datasource-provider mysql
+ * npx prisma db pull
+ * npx prisma generate
+ * 
+ */
+generator client {
+  provider = &quot;prisma-client-js&quot;
+}
+
+datasource db {
+  provider = &quot;mysql&quot;
+  url      = env(&quot;DATABASE_URL&quot;)
+}
+
+model taskdetails {
+  id            Int             @id @default(autoincrement())
+  name          String          @db.VarChar(100)
+  finished      Boolean
+  createdAt     DateTime        @default(now()) @db.DateTime(0)
+  updatedAt     DateTime        @default(now()) @db.DateTime(0)
+  taskrelations taskrelations[]
+}
+
+//I add foreign key in data table, it will automatic create by itself when I use command.
+model taskrelations {
+  id          Int         @id @default(autoincrement())
+  task_id     Int
+  list_id     Int
+  todolist    todolist    @relation(fields: [list_id], references: [id], onDelete: Cascade, map: &quot;foreign_list&quot;)
+  taskdetails taskdetails @relation(fields: [task_id], references: [id], onDelete: Cascade, map: &quot;foreign_task&quot;)
+
+  @@index([list_id], map: &quot;foreign_list&quot;)
+  @@index([task_id], map: &quot;foreign_task&quot;)
+}
+
+model todolist {
+  id            Int             @id @default(autoincrement())
+  name          String          @db.VarChar(50)
+  taskrelations taskrelations[]
+}
+</code></pre>
+<h3 id="indexejs">index.ejs</h3>
+<pre><code class="language-javascript=">&lt;script src=&quot;https://code.jquery.com/jquery-3.6.1.min.js&quot;
+    integrity=&quot;sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
+
+&lt;body&gt;
+    &lt;input type=&quot;text&quot; id=&quot;todolistName&quot; placeholder=&quot;todolist-name&quot;&gt;
+    &lt;button id=&quot;addTodolistBtn&quot;&gt;new Todolist&lt;/button&gt;
+    &lt;ul id=&quot;todolist&quot;&gt;
+    &lt;/ul&gt;
+&lt;/body&gt;
+&lt;script&gt;
+    let addTodolist = () =&gt; {
+        let name = $(&quot;#todolistName&quot;).val();
+        if ($.trim(name) == '') {
+            alert(&quot;todolist's name cannot be empty.&quot;);
+            return false;
+        }
+        $.ajax({
+            url: &quot;./addTodo&quot;,
+            data: { name },
+            method: &quot;POST&quot;,
+            dataType: &quot;json&quot;
+        }).done(rs =&gt; {
+            let e = $(&quot;&lt;a&gt;&quot;, { href: `./todo/${rs.id}`, text: rs.name });
+            e = $(&quot;&lt;h1&gt;&quot;).append(e);
+            e = $(&quot;&lt;li&gt;&quot;).append(e);
+            $(&quot;#todolist&quot;).append(e);
+        }).fail(rs =&gt; console.error(rs));
+    }
+
+    let loadTodolist = () =&gt; {
+        $.ajax({
+            url: &quot;./loadTodolist&quot;,
+            method: &quot;GET&quot;,
+            dataType: &quot;json&quot;
+        }).done(rs =&gt; {
+            rs.forEach(element =&gt; {
+                let e = $(&quot;&lt;a&gt;&quot;, { href: `./todo/${element.id}`, text: element.name });
+                e = $(&quot;&lt;h1&gt;&quot;).append(e);
+                e = $(&quot;&lt;li&gt;&quot;).append(e);
+                $(&quot;#todolist&quot;).append(e);
+            });
+        }).fail(rs =&gt; console.error(rs));
+    }
+
+    $(&quot;body&quot;).ready(() =&gt; {
+        loadTodolist();
+        $(&quot;body&quot;).on(&quot;click&quot;, &quot;#addTodolistBtn&quot;, addTodolist);
+    })
+&lt;/script&gt;
+</code></pre>
+<h3 id="todoejs">todo.ejs</h3>
+<pre><code class="language-javascript=">&lt;script src=&quot;https://code.jquery.com/jquery-3.6.1.min.js&quot;
+    integrity=&quot;sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
+
+&lt;body&gt;
+    &lt;a href=&quot;/todo&quot;&gt;Index&lt;/a&gt;
+    &lt;h1 id=&quot;todolist-name&quot;&gt;&lt;/h1&gt;
+    &lt;ol id=&quot;task-container&quot;&gt;
+    &lt;/ol&gt;
+    &lt;form method=&quot;post&quot;&gt;
+        name: &lt;input name=&quot;name&quot; id=&quot;taskName&quot;&gt;
+        &lt;button type=&quot;button&quot; id=&quot;submitBtn&quot;&gt;submit&lt;/button&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;script&gt;
+    let todoID = new URL(location.href).pathname.split('/')[2];
+    let loadTasks = () =&gt; {
+        if (!todoID.match(/\d/)) return;
+
+        $.ajax({
+            url: `/loadTasks/${todoID}`,
+            method: &quot;GET&quot;,
+            dataType: &quot;json&quot;,
+        }).done(rs =&gt; {
+            $(&quot;#todolist-name&quot;).text(rs.name);
+            rs['taskrelations'].forEach(task =&gt; {
+                let e = $(&quot;&lt;span&gt;&quot;, { text: task.taskdetails.name });
+                let btn = $(&quot;&lt;button&gt;&quot;, { class: 'deleteTaskBtn', text: 'x', &quot;d-id&quot;: task.taskdetails.id });
+                let checkbox = $(&quot;&lt;input&gt;&quot;, { type: 'checkbox', class: 'checkTaskBtn', &quot;d-id&quot;: task.taskdetails.id, &quot;checked&quot;: task.taskdetails.finished });
+                
+                e = $(&quot;&lt;li&gt;&quot;, { &quot;d-id&quot;: task.taskdetails.id }).append(btn, e, checkbox);
+                $(&quot;#task-container&quot;).append(e);
+            });
+        }).fail(rs =&gt; console.error(rs));
+    }
+
+    let addTask = (e) =&gt; {
+        if (!todoID.match(/\d/)) return;
+
+        let name = $(&quot;#taskName&quot;).val();
+        if ($.trim(name) == '') {
+            alert(&quot;task's name cannot be empty.&quot;);
+            return false;
+        }
+        $.ajax({
+            url: `/todo/${todoID}`,
+            data: { name },
+            method: &quot;POST&quot;,
+            dataType: &quot;json&quot;
+        }).done(task =&gt; {
+            let e = $(&quot;&lt;span&gt;&quot;, { text: task.name });
+            let btn = $(&quot;&lt;button&gt;&quot;, { class: 'deleteTaskBtn', text: 'x', &quot;d-id&quot;: task.id });
+            let checkbox = $(&quot;&lt;input&gt;&quot;, { type: 'checkbox', class: 'checkTaskBtn', &quot;d-id&quot;: task.id, &quot;checked&quot;: task.finished });
+
+            e = $(&quot;&lt;li&gt;&quot;, { &quot;d-id&quot;: task.id }).append(btn, e, checkbox);
+            $(&quot;#task-container&quot;).append(e);
+        }).fail(rs =&gt; console.error(rs));
+    }
+
+    let deleteTask = (e) =&gt; {
+        let id = $(e.target).attr('d-id');
+        $.ajax({
+            url: `/todo`,
+            data: { id },
+            method: &quot;DELETE&quot;,
+            dataType: &quot;text&quot;
+        }).done(rs =&gt; {
+            $(&quot;#task-container&quot;).find(`li[d-id=${id}]`).remove();
+        }).fail(rs =&gt; console.error(rs));
+    }
+
+    let checkTask = (e) =&gt; {
+        let id = $(e.target).attr('d-id');
+        let checked = $(e.target).is(&quot;:checked&quot;);
+        console.log(checked);
+        $.ajax({
+            url: `/todo`,
+            data: { id, checked },
+            method: &quot;PATCH&quot;,
+            dataType: &quot;text&quot;
+        }).done(rs =&gt; {
+
+        }).fail(rs =&gt; console.error(rs));
+    }
+
+    $(&quot;body&quot;).ready(() =&gt; {
+        loadTasks();
+        $(&quot;body&quot;).on(&quot;click&quot;, &quot;#submitBtn&quot;, addTask);
+        $(&quot;body&quot;).on(&quot;click&quot;, &quot;.deleteTaskBtn&quot;, deleteTask);
+        $(&quot;body&quot;).on(&quot;change&quot;, &quot;.checkTaskBtn&quot;, checkTask);
+    })
+
+&lt;/script&gt;
+</code></pre>
+<h3 id="gulpfilejs">gulpfile.js</h3>
+<pre><code class="language-javascript=">/*
+ * use gulp to automatic refresh when the code changed.
+ */
+var gulp = require('gulp');
+const nodemon = require('gulp-nodemon');
+const express = require('gulp-express');
+
+gulp.task('webserver', function () {
+    nodemon({
+        script: './app/app.ts',
+    });
+
+    //when below's code changed, refresh the task.
+    gulp.watch('./app/*.ts', express.notify);
+    gulp.watch('./app/view/*.html', express.notify);
+});
+
+//use command -&gt; &quot;gulp serve&quot; to start the task
+gulp.task('serve', gulp.series('webserver'));
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/22-generate-parentheses/">
+                <h3 class="post-title">
+                  22. Generate Parentheses
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge ">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge secondary">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge ">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge secondary">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge secondary">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge secondary">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

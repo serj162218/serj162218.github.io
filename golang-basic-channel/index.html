@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Golang Basic - Channel | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Golang Basic - Channel</h1>
+            <p class="article-meta">
+              2023-05-10
+              
+                <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+                  Golang Basic
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p><a href="https://youtu.be/YS4e4q9oBaU?t=21910">reference source</a></p>
+<h1 id="channel">Channel</h1>
+<p>For communicating data between goroutines</p>
+<h2 id="example">Example</h2>
+<p><code>i := ← ch</code>Get the first element in the channel</p>
+<p><code>ch ← 5</code>Push elements into the channel</p>
+<p><code>ch := make(chan int)</code>Create an integer channel with a space of 1</p>
+<p>Channel can be specified as any type, even struct, but after specifying, the channel can only hold this type, which is like an array<br>
+A space of 1 means that no new elements can be placed in the channel before the elements in the channel have been discharged or you will get an out of index error.</p>
+<pre><code class="language-java">var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int)
+	wg.Add(2)
+	go func() {
+		i := &lt;-ch
+		fmt.Println(i)
+		wg.Done()
+	}()
+	go func() {
+		ch &lt;- 5
+		wg.Done()
+	}()
+	wg.Wait()
+}
+</code></pre>
+<p>If you want to put multiple elements in, you can directly specify the size of the space when making</p>
+<pre><code class="language-java">var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int, 10)
+	wg.Add(2)
+	go func() {
+		i := &lt;-ch
+		fmt.Println(i)
+		wg.Done()
+	}()
+	go func() {
+		ch &lt;- 5
+		ch &lt;- 3 //no error
+		wg.Done()
+	}()
+	wg.Wait()
+}
+</code></pre>
+<h2 id="receive-send">Receive / Send</h2>
+<p>In goroutines, channels can be received and sent, but there will be order problems<br>
+line 7, i is waiting for elements in the channel. After line 13 put a element in, line 8 will be executed.<br>
+line 14 is also waiting for elements in the channel. After line 9 put a element in, line 14 will be executed.</p>
+<pre><code class="language-java">var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int)
+	wg.Add(2)
+	go func() {
+		i := &lt;-ch
+		fmt.Println(&quot;from 15&quot;, i)
+		ch &lt;- 2
+		wg.Done()
+	}()
+	go func() {
+		ch &lt;- 1
+		fmt.Println(&quot;from 21&quot;, &lt;-ch)
+		wg.Done()
+	}()
+	wg.Wait()
+}
+
+from 15 1
+from 21 2
+</code></pre>
+<p>You can specify whether the goroutines are send on channel or receive only channel to avoid the above problems.</p>
+<pre><code class="language-java">var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int)
+	wg.Add(2)
+	//receive only channel
+	go func(ch &lt;-chan int) {
+		i := &lt;-ch
+		fmt.Println(i)
+		wg.Done()
+	}(ch)
+	//send only channel
+	go func(ch chan&lt;- int) {
+		ch &lt;- 1
+		wg.Done()
+	}(ch)
+	wg.Wait()
+}
+</code></pre>
+<h2 id="for-loop-with-channel">for loop with channel</h2>
+<p>Use <code>for := range ch</code> to loop the channel, when there is a new element in the channel, it will be executed immediately, and it will end when the channel is closed.<br>
+<code>close(ch)</code> means to close the channel. After closing the channel, there is no way to reopen it, and no more elements can be placed.</p>
+<pre><code class="language-java">var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int)
+	wg.Add(2)
+	go func(ch &lt;-chan int) {
+		for i := range ch {
+			fmt.Println(i)
+		}
+		wg.Done()
+	}(ch)
+	go func(ch chan&lt;- int) {
+		for i := 0; i &lt; 10; i++ {
+			ch &lt;- i
+		}
+		close(ch)
+		wg.Done()
+	}(ch)
+	wg.Wait()
+}
+
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+</code></pre>
+<p>If you can't loop channel directly, you can rewrite it as follows</p>
+<pre><code class="language-java">var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int)
+	wg.Add(2)
+	go func(ch &lt;-chan int) {
+		for {
+			//do something else
+			if i, ok := &lt;-ch; ok {
+				fmt.Println(i)
+			} else {
+				break
+			}
+		}
+		wg.Done()
+	}(ch)
+	go func(ch chan&lt;- int) {
+		for i := 0; i &lt; 3; i++ {
+			ch &lt;- i
+		}
+		close(ch)
+		wg.Done()
+	}(ch)
+	wg.Wait()
+}
+
+0
+1
+2
+</code></pre>
+<h2 id="select-and-struct">Select and struct{}</h2>
+<p>The above methods must close the channel to end the loop.<br>
+If you don't want to end the loop by closing the channel, you can use the second method instead<br>
+<code>select</code> means that if one of ch and doneCh has an element, it will be executed first. Otherwise, if there is none, it will block.<br>
+Use the flag method to break the outer loop</p>
+<p><code>doneCh ← struct{}{}</code>struct{} is the type, and the following {} is the way of creation. Just imagine it as an common obj{}</p>
+<p>The advantage of <code>struct{}</code> is that it does not occupy any memory, it is better than boolean, and it is specially used to detect whether to send a message</p>
+<pre><code class="language-java">var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int)
+	doneCh := make(chan struct{})
+	wg.Add(2)
+	go func(ch &lt;-chan int) {
+	LOOP:
+		for {
+			select {
+			case entry := &lt;-ch:
+				fmt.Println(entry)
+			case &lt;-doneCh:
+				break LOOP
+			}
+		}
+		wg.Done()
+	}(ch)
+	go func(ch chan&lt;- int) {
+		for i := 0; i &lt; 3; i++ {
+			ch &lt;- i
+		}
+		doneCh &lt;- struct{}{}
+		wg.Done()
+	}(ch)
+	wg.Wait()
+}
+
+0
+1
+2
+</code></pre>
+<h2 id="example-2-with-closing-channel">Example 2 with closing channel</h2>
+<p>Goroutines will be forced to close after the execution of main function. For a safe and smooth shutdown, the following method can be used.</p>
+<pre><code class="language-java">type logEntry struct {
+	time     time.Time
+	severity string
+	message  string
+}
+
+var logCh = make(chan logEntry, 50)
+
+func main() {
+	go logger()
+
+	logCh &lt;- logEntry{time.Now(), &quot;NOTICE&quot;, &quot;App starting&quot;}
+	logCh &lt;- logEntry{time.Now(), &quot;WARNING&quot;, &quot;App finishing&quot;}
+
+	time.Sleep(100 * time.Millisecond)
+}
+
+func logger() {
+	for entry := range logCh {
+		fmt.Printf(&quot;%v - [%v]%v\n&quot;, entry.time.Format(&quot;2006-01-02T15:04P:05&quot;), entry.severity, entry.message)
+	}
+}
+
+2023-04-14T14:37P:26 - [NOTICE]App starting
+2023-04-14T14:37P:26 - [WARNING]App finishing
+</code></pre>
+<h3 id="1-defer">1. defer</h3>
+<pre><code class="language-java">func main() {
+	go logger()
+	defer func() {
+		close(logCh)
+	}()
+	logCh &lt;- logEntry{time.Now(), &quot;NOTICE&quot;, &quot;App starting&quot;}
+	logCh &lt;- logEntry{time.Now(), &quot;WARNING&quot;, &quot;App finishing&quot;}
+
+	time.Sleep(100 * time.Millisecond)
+}
+
+func logger() {
+	for entry := range logCh {
+		fmt.Printf(&quot;%v - [%v]%v\n&quot;, entry.time.Format(&quot;2006-01-02T15:04P:05&quot;), entry.severity, entry.message)
+	}
+}
+</code></pre>
+<h3 id="2-select-and-struct">2. Select and struct{}</h3>
+<pre><code class="language-java">var logCh = make(chan logEntry, 50)
+var doneCh = make(chan struct{})
+
+func main() {
+	go logger()
+	logCh &lt;- logEntry{time.Now(), &quot;NOTICE&quot;, &quot;App starting&quot;}
+	logCh &lt;- logEntry{time.Now(), &quot;WARNING&quot;, &quot;App finishing&quot;}
+	time.Sleep(100 * time.Millisecond)
+	doneCh &lt;- struct{}{}
+}
+
+func logger() {
+Loop:
+	for {
+		select {
+		case entry := &lt;-logCh:
+			fmt.Printf(&quot;%v - [%v]%v\n&quot;, entry.time.Format(&quot;2006-01-02T15:04P:05&quot;), entry.severity, entry.message)
+		case &lt;-doneCh:
+			break Loop
+		}
+	}
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/golang-basic-array-and-slice/">
+                <h3 class="post-title">
+                  Golang Basic - Array &amp; Slice
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge success">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge success">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge success">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge ">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge success">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge ">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

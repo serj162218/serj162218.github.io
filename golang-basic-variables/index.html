@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Golang Basic - Variables | AnnieMeow</title>
+<meta name="description" content="A little cat who named &amp;lt;?=$name?&amp;gt; likes to &amp;lt;?=$hibit?&amp;gt;.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://serj162218.github.io//favicon.ico?v=1684434780321">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://serj162218.github.io//styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://serj162218.github.io/">AnnieMeow</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                Index
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/archives" class="menu">
+                Archives
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Golang Basic - Variables</h1>
+            <p class="article-meta">
+              2023-05-10
+              
+                <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge secondary">
+                  Golang Basic
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p><a href="https://youtu.be/YS4e4q9oBaU?t=2148">reference source</a></p>
+<h1 id="variables">Variables</h1>
+<h2 id="declare">Declare</h2>
+<pre><code class="language-java">func main(){
+	//you can use this three method above in the function.
+	var i int = 5
+	var j int
+	j = 8
+	k := 10 //non-declaration
+	var (
+		m int
+		n int = 22
+	)
+	m = 8
+	fmt.Printf(&quot;%v %v %v %v %v&quot;, i, j, k, m, n)
+}
+
+//You cannot use non-declartion outside the function.
+//x := 10
+
+//You cannot split var j int = 5 into two lines.
+//var j int
+//j = 5
+</code></pre>
+<h2 id="_-underscore">_ (underscore)</h2>
+<p>When you encounter some function that returns a value, or other situations, you can use underscore when you don't want to use this variable.</p>
+<pre><code class="language-java">func main() {
+	var _ int = 5
+}
+//no error
+</code></pre>
+<h2 id="shadowing">shadowing</h2>
+<p>Variable declaration priority will take the closest scope</p>
+<pre><code class="language-java">func main() {
+	var i int = 15
+	fmt.Printf(&quot;%v&quot;, i) //15
+	otherFunc()         //10
+
+	func() {
+		fmt.Printf(&quot;%v&quot;, i) //15
+		var i int = 30
+		fmt.Printf(&quot;%v&quot;, i) //30
+	}()
+}
+func otherFunc() {
+	fmt.Printf(&quot;%v&quot;, i)
+}
+</code></pre>
+<h2 id="always-have-to-be-used">Always have to be used</h2>
+<pre><code class="language-java">func main() {
+	var i int = 42
+	//i declared and not used
+}
+</code></pre>
+<h2 id="name-rules">Name Rules</h2>
+<p>First Letter of variable is Uppercase means export it to other packages.</p>
+<pre><code class="language-java">var (
+	accountName int //global only for this package
+	SeasonNum int //can be used outside this package
+)
+
+//global only for this package
+func privateFunc() {
+
+}
+
+//can be used outside this package
+func PublicFunc() {
+
+}
+</code></pre>
+<h2 id="type-conversion">Type conversion</h2>
+<pre><code class="language-java">func main() {
+	i := 88
+	fmt.Printf(&quot;%v&quot;, string(i)) //X, integer to ascii
+	j := 55.22
+	fmt.Printf(&quot;%v&quot;, int(j)) //55
+	//Bewares float cannot be changed to string
+	//fmt.Printf(&quot;%v&quot;, string(j))
+}
+</code></pre>
+<h3 id="string-to-integer-directly">String to Integer directly</h3>
+<pre><code class="language-java">import (
+	&quot;strconv&quot;
+)
+
+func main() {
+	i := 85
+	fmt.Printf(&quot;%v %T&quot;, string(i)) //U string
+	fmt.Printf(&quot;%v %T&quot;, strconv.Itoa(i)) //85 string
+
+	j := &quot;66&quot;
+	k, err := strconv.ParseInt(j, 10, 32)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf(&quot;%v %T&quot;, k, k)
+}
+</code></pre>
+<h3 id="zero-value">Zero-Value</h3>
+<p>In Go, every time initialize a value, it has a zero value.</p>
+<pre><code class="language-java">func main() {
+	var i int
+	var n bool
+	var k string
+	p := k == &quot;&quot;
+	fmt.Printf(&quot;%v %T , %v %T , %v %T , %v&quot;, i, i, n, n, k, k, p)
+}
+
+0 int, false bool,  string, true
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                Next &gt;
+              </div>
+              <a href="https://serj162218.github.io/golang-basic-struct/">
+                <h3 class="post-title">
+                  Golang Basic - Struct
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://serj162218.github.io//images/avatar.png?v=1684434780321" class="no-responsive avatar">
+    <div class="text-muted">A little cat who named &lt;?=$name?&gt; likes to &lt;?=$hibit?&gt;.</div>
+    <div class="social-container">
+      
+        
+          <a href="https://github.com/serj162218" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Latest Article
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-unit-test/">Golang Basic - Unit test</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-variables/">Golang Basic - Variables</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-struct/">Golang Basic - Struct</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-primitives/">Golang Basic - Primitives</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-pointers/">Golang Basic - Pointers</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-map/">Golang Basic - Map</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-interface/">Golang Basic - Interface</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-if-and-switch-statements/">Golang Basic - If and Switch Statements</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-goroutines/">Golang Basic - GoRoutines</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://serj162218.github.io/golang-basic-function/">Golang Basic - Function</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      Tags
+    </div>
+    <div class="row">
+      
+        <a href="https://serj162218.github.io/tag/hl18hCdAP/" class="badge warning">
+          Golang Basic
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/e2ksjSHDX/" class="badge success">
+          sql
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/IPziRV_tR/" class="badge secondary">
+          leetcode
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/fQfrV7sv2/" class="badge secondary">
+          javascript
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/gYy3vmfCl/" class="badge secondary">
+          others
+        </a>
+      
+        <a href="https://serj162218.github.io/tag/hevQ_ITqL/" class="badge secondary">
+          Common used
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    <h3>I'm wondering where's my fish, fish, fish for my dish, dish, dish.</h3></a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>
