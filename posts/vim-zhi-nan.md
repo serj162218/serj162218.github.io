@@ -1,7 +1,7 @@
 ---
 title: 'vim 指南'
 date: 2022-11-01 12:07:57
-tags: []
+tags: [others]
 published: true
 hideInList: false
 feature: 

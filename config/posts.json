@@ -1,6 +1,295 @@
 {
   "posts": [
     {
+      "content": "# Unit test\r\n> If it's difficult to write the test, you might consider to break down the function into pieces.\r\n## Initialize before test\r\nIf it need to initalize first like connecting database, we can create a `main_test.go` then wrote this below.\r\n```java\r\n    func TestMain(m *testing.M) {\r\n        initializer.Initialize()\r\n        code := m.Run()\r\n        os.Exit(code)\r\n    }\r\n```\r\n\r\n## Testing the route\r\nIf we want to testing route which used gin. We can create a router, then use `httptest.NewRecorder()` to test this route.\r\n```java\r\n\t//set a router\r\n\trouter := gin.Default()\r\n\trouter.POST(\"/register\", controller.Register)\r\n\r\n\t//create a request with a body with JSON\r\n\tuser := model.User{\r\n\t\tID:       \"test\",\r\n\t\tEmail:    \"test@example.com\",\r\n\t\tPassword: \"123456\",\r\n\t}\r\n\trequestBody, _ := json.Marshal(user)\r\n\treq, _ := http.NewRequest(\"POST\", \"/register\", bytes.NewBuffer(requestBody))\r\n    // Set the header\r\n\treq.Header.Set(\"Content-Type\", \"application/json\")\r\n\r\n    //Recorder\r\n\trecorder := httptest.NewRecorder()\r\n\trouter.ServeHTTP(recorder, req)\r\n```\r\n\r\n> Remember that if the route is for register or something, you need to delete the test data after the test.\r\n\r\n## Example for Unit test\r\n### Simple test\r\n```java\r\nfunc TestVerifyToken(t *testing.T) {\r\n\ttoken := \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJJRCI6InRlc3QiLCJFbWFpbCI6InRlc3RAZXhhbXBsZS5jb20ifQ.F8jgR95R3FAs6L1Cn4-eZpLv7N2tKJ7r5VmuqBDYD6k\"\r\n\tsecretKey := []byte(\"test-key\")\r\n\r\n\tresult, err := helper.VerifyToken(token, secretKey)\r\n\r\n\tif err != nil {\r\n\t\tt.Errorf(\"expect no error, but got %v\", err)\r\n\t}\r\n\r\n\tif !result.Valid {\r\n\t\tt.Errorf(\"expect result is valided\")\r\n\t}\r\n\r\n\tclaims, ok := result.Claims.(jwt.MapClaims)\r\n\tif !ok {\r\n\t\tt.Errorf(\"expect result claims to be MapClaims\")\r\n\t}\r\n\r\n\tif claims[\"Email\"] != \"test@example.com\" {\r\n\t\tt.Errorf(\"expect result Email to be test@example.com\")\r\n\t}\r\n\tif claims[\"ID\"] != \"test\" {\r\n\t\tt.Errorf(\"expect result ID to be test\")\r\n\t}\r\n}\r\n```\r\n### Route test\r\n```java\r\nfunc TestUserRegister(t *testing.T) {\r\n\t//set a router\r\n\trouter := gin.Default()\r\n\trouter.POST(\"/register\", controller.UserRegister)\r\n\r\n\t//create a request with a body with JSON\r\n\tuser := model.User{\r\n\t\tID:       \"test\",\r\n\t\tEmail:    \"test@example.com\",\r\n\t\tPassword: \"123456\",\r\n\t}\r\n\trequestBody, _ := json.Marshal(user)\r\n\treq, _ := http.NewRequest(\"POST\", \"/register\", bytes.NewBuffer(requestBody))\r\n\treq.Header.Set(\"Content-Type\", \"application/json\")\r\n\r\n\trecorder := httptest.NewRecorder()\r\n\r\n\trouter.ServeHTTP(recorder, req)\r\n\r\n\t// Check the status code is what we expect.\r\n\tif status := recorder.Code; status != http.StatusOK {\r\n\t\tt.Errorf(\"handler returned wrong status code: got %v want %v\",\r\n\t\t\tstatus, http.StatusOK)\r\n\t}\r\n\r\n\t// Check the response body is what we expect.\r\n\texpectedResponse := `{\"message\":\"User registered\"}`\r\n\tif recorder.Body.String() != expectedResponse {\r\n\t\tt.Errorf(\"handler returned unexpected body: got %v want %v\",\r\n\t\t\trecorder.Body.String(), expectedResponse)\r\n\t}\r\n\r\n\t//Remember that this function is for register. So we need to delete user after testing.\r\n\tinitializer.DB.Exec(\"DELETE FROM users WHERE id = 'test'\")\r\n}\r\n```\r\n### Test with Redis\r\n```java\r\n/**\r\n * Test that is the token add into black list successfully\r\n * Remember to delete the token from redis after the test is done\r\n */\r\nfunc TestAddTokenToBlacklist(t *testing.T) {\r\n\ttoken := \"test token\"\r\n\tresult := model.AddTokenToBlacklist(token)\r\n\tif result != nil {\r\n\t\tt.Errorf(\"expected no error, but got %v\", result)\r\n\t}\r\n\tisExist, err := initializer.RDB.SIsMember(context.Background(), \"black_list\", token).Result()\r\n\tif err != nil {\r\n\t\tt.Errorf(\"expected no error, but got %v\", err)\r\n\t}\r\n\tif isExist != true {\r\n\t\tt.Errorf(\"expected %v, but got %v\", true, isExist)\r\n\t}\r\n\tinitializer.RDB.SRem(context.Background(), \"black_list\", token)\r\n}\r\n```",
+      "data": {
+        "title": "Golang Basic - Unit test",
+        "date": "2023-05-19 02:09:40",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-unit-test"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=2148)\r\n# Variables\r\n## Declare\r\n```java\r\nfunc main(){\r\n\t//you can use this three method above in the function.\r\n\tvar i int = 5\r\n\tvar j int\r\n\tj = 8\r\n\tk := 10 //non-declaration\r\n\tvar (\r\n\t\tm int\r\n\t\tn int = 22\r\n\t)\r\n\tm = 8\r\n\tfmt.Printf(\"%v %v %v %v %v\", i, j, k, m, n)\r\n}\r\n\r\n//You cannot use non-declartion outside the function.\r\n//x := 10\r\n\r\n//You cannot split var j int = 5 into two lines.\r\n//var j int\r\n//j = 5\r\n```\r\n\r\n## _ (underscore)\r\n\r\nWhen you encounter some function that returns a value, or other situations, you can use underscore when you don't want to use this variable.\r\n\r\n\r\n```java\r\nfunc main() {\r\n\tvar _ int = 5\r\n}\r\n//no error\r\n```\r\n\r\n## shadowing\r\n\r\nVariable declaration priority will take the closest scope\r\n\r\n```java\r\nfunc main() {\r\n\tvar i int = 15\r\n\tfmt.Printf(\"%v\", i) //15\r\n\totherFunc()         //10\r\n\r\n\tfunc() {\r\n\t\tfmt.Printf(\"%v\", i) //15\r\n\t\tvar i int = 30\r\n\t\tfmt.Printf(\"%v\", i) //30\r\n\t}()\r\n}\r\nfunc otherFunc() {\r\n\tfmt.Printf(\"%v\", i)\r\n}\r\n```\r\n\r\n## Always have to be used\r\n\r\n```java\r\nfunc main() {\r\n\tvar i int = 42\r\n\t//i declared and not used\r\n}\r\n```\r\n\r\n## Name Rules\r\n\r\nFirst Letter of variable is Uppercase means export it to other packages.\r\n\r\n```java\r\nvar (\r\n\taccountName int //global only for this package\r\n\tSeasonNum int //can be used outside this package\r\n)\r\n\r\n//global only for this package\r\nfunc privateFunc() {\r\n\r\n}\r\n\r\n//can be used outside this package\r\nfunc PublicFunc() {\r\n\r\n}\r\n```\r\n\r\n## Type conversion\r\n\r\n```java\r\nfunc main() {\r\n\ti := 88\r\n\tfmt.Printf(\"%v\", string(i)) //X, integer to ascii\r\n\tj := 55.22\r\n\tfmt.Printf(\"%v\", int(j)) //55\r\n\t//Bewares float cannot be changed to string\r\n\t//fmt.Printf(\"%v\", string(j))\r\n}\r\n```\r\n\r\n### String to Integer directly\r\n\r\n```java\r\nimport (\r\n\t\"strconv\"\r\n)\r\n\r\nfunc main() {\r\n\ti := 85\r\n\tfmt.Printf(\"%v %T\", string(i)) //U string\r\n\tfmt.Printf(\"%v %T\", strconv.Itoa(i)) //85 string\r\n\r\n\tj := \"66\"\r\n\tk, err := strconv.ParseInt(j, 10, 32)\r\n\tif err != nil {\r\n\t\tpanic(err)\r\n\t}\r\n\tfmt.Printf(\"%v %T\", k, k)\r\n}\r\n```\r\n\r\n### Zero-Value\r\n\r\nIn Go, every time initialize a value, it has a zero value.\r\n\r\n```java\r\nfunc main() {\r\n\tvar i int\r\n\tvar n bool\r\n\tvar k string\r\n\tp := k == \"\"\r\n\tfmt.Printf(\"%v %T , %v %T , %v %T , %v\", i, i, n, n, k, k, p)\r\n}\r\n\r\n0 int, false bool,  string, true\r\n```",
+      "data": {
+        "title": "Golang Basic - Variables",
+        "date": "2023-05-10 21:25:31",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-variables"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=8885)\r\n# Struct\r\n*struct is like a class, new as a object*\r\n\r\n## Example\r\n\r\n```java\r\ntype Doctor struct {\r\n\tnumber     int\r\n\tactorName  string\r\n\tcompanions []string\r\n}\r\n\r\nfunc main() {\r\n\taDoc := Doctor{\r\n\t\tnumber:    3,\r\n\t\tactorName: \"JOSH\",\r\n\t\tcompanions: []string{\r\n\t\t\t\"Liz\",\r\n\t\t\t\"Aosh\",\r\n\t\t},\r\n\t}\r\n\tfmt.Println(aDoc) //{3 JOSH [Liz Aosh]}\r\n\tfmt.Println(aDoc.number) //3\r\n}\r\n```\r\n\r\nYou can also code it like this, but it is not recommended because it is inconvenient to maintain.\r\n\r\n```java\r\nfunc main() {\r\n\taDoc := Doctor{\r\n\t\t3,\r\n\t\t\"JOSH\",\r\n\t\t[]string{\r\n\t\t\t\"Liz\",\r\n\t\t\t\"Aosh\",\r\n\t\t},\r\n\t}\r\n\tfmt.Println(aDoc.companions)\r\n}\r\n```\r\n\r\nThe naming rules of struct are the same as variables, if the first letter of the key is uppercase, it will be exported, and if the first letter of struct is uppercase, it will also be exported.\r\nIf the struct is exported, but the key does not, the key cannot be used in other packages.\r\n\r\n## anonymous struct\r\n\r\n```java\r\nfunc main() {\r\n\taDoc := struct{ name string }{name: \"John\"}\r\n\tfmt.Println(aDoc)\r\n}\r\n```\r\n\r\nStruct is a deep copy, and like Array, it can use indicators to do similar shallow copy\r\n\r\n```java\r\nfunc main() {\r\n\taDoc := struct{ name string }{name: \"John\"}\r\n\tbDoc := aDoc\r\n\tbDoc.name = \"Bee\"\r\n\tfmt.Println(aDoc) //{John}\r\n\tfmt.Println(bDoc) //{Bee}\r\n}\r\n```\r\n\r\n## Embedding\r\n\r\nGo does not have inheritance but it have embeddon. Although there has curly brackets when printing out, it does not affect anything.\r\n\r\ngo沒有inheritance，反之在go是使用embedding，雖然embedding後print out時多了個curly brackets，但在使用上不影響。\r\n\r\n```java\r\ntype Animal struct {\r\n\tName   string\r\n\tOrigin string\r\n}\r\n\r\ntype Bird struct {\r\n\tAnimal   //embedding\r\n\tCanFly   bool\r\n\tSpeedKPH float32\r\n}\r\n\r\nfunc main() {\r\n\tb := Bird{}\r\n\tb.Name = \"Blue bird\"\r\n\tb.Origin = \"Australia\"\r\n\tb.CanFly = true\r\n\tb.SpeedKPH = 32.\r\n\r\n\tfmt.Println(b) //{{Blue bird Australia} true 32}\r\n\tfmt.Println(b.Name) //Blue bird\r\n}\r\n```\r\n\r\nAnother example\r\n\r\n```java\r\nfunc main() {\r\n\tb := Bird{\r\n\t\tAnimal:   Animal{Name: \"BBird\", Origin: \"Taiwan\"},\r\n\t\tCanFly:   true,\r\n\t\tSpeedKPH: 32.,\r\n\t}\r\n\r\n\tfmt.Println(b) //{{BBird Taiwan} true 32}\r\n\tfmt.Println(b.Name) //BBird\r\n}\r\n```\r\n\r\n## Tag\r\n\r\nIt has no meaning itself, but for using in some frameworks or validation.\r\n\r\n```java\r\ntype Animal struct {\r\n\tName   string `required:\"true\" max:\"100\"`\r\n\tOrigin string\r\n}\r\n\r\nfunc main() {\r\n\tt := reflect.TypeOf(Animal{})\r\n\tfield, _ := t.FieldByName(\"Name\")\r\n\tfmt.Println(field.Tag) //required:\"true\" max:\"100\"\r\n}\r\n```",
+      "data": {
+        "title": "Golang Basic - Struct",
+        "date": "2023-05-10 21:18:43",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-struct"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=3425)\r\n# Primitives\r\n## Bool\r\n```java\r\nfunc main() {\r\n\tvar a bool = true\r\n\tb := 1 == 1 \r\n\tvar c bool = 2 == 1\r\n\tfmt.Printf(\"%v %v %v\\n\", a, b, c) //true true false\r\n}\r\n```\r\n\r\n## Integer\r\n\r\n### signed integer\r\n\r\n| int8 | -128 ~ 127 |\r\n| --- | --- |\r\n| int16 | -32 768 ~ 32 767 |\r\n| int32 | -2 147 483 648 ~ 2 147 483 647 |\r\n| int64 | -9 223 372 036 854 775 808 ~ 9 223 372 036 854 775 807 |\r\n\r\n### unsigned integer\r\n\r\n| uint8 | 0 ~ 255 |\r\n| --- | --- |\r\n| uint16 | 0 ~ 65 535 |\r\n| uint32 | 0 ~ 4 294 967 295 |\r\n\r\n### with operator\r\n\r\n```java\r\nfunc main() {\r\n\ta := 10\r\n\tb := 4\r\n\tfmt.Println(a + b) //14\r\n\tfmt.Println(a - b) //6\r\n\tfmt.Println(a / b) //2\r\n\tfmt.Println(a * b) //40\r\n\tfmt.Println(a % b) //2\r\n}\r\n```\r\n\r\n### Integer’s type can’t be different when operation\r\n\r\n```java\r\nfunc main() {\r\n\tvar a int = 10\r\n\tvar b int8 = 12\r\n\tfmt.Println(a + b)\r\n\t//invalid operation: a + b (mismatched types int and int8)\r\n}\r\n```\r\n\r\n### Bit operators\r\n\r\n```java\r\nfunc main() {\r\n\ta := 10             //1010\r\n\tb := 3              //0011\r\n\tfmt.Println(a & b)  //AND 0010\r\n\tfmt.Println(a | b)  //OR 1011\r\n\tfmt.Println(a ^ b)  //Exclusive OR 1001\r\n\tfmt.Println(a &^ b) //NAND 1000, a(1010) & ^b(0011->1100), so it becomes 1010 & 1100\r\n}\r\n```\r\n\r\n### Bit shifting\r\n\r\n```java\r\nfunc main() {\r\n\ta := 4              //0100 2^2\r\n\tfmt.Println(a >> 1) //0010 2^2 / 2^1\r\n\tfmt.Println(a << 2) //1000 2^2 * 2^2\r\n}\r\n```\r\n\r\n## Float\r\n\r\n| float32 | +-1.18E-38 ~ +-3.4E38 |\r\n| --- | --- |\r\n| float64 | +-2.23E-308 ~ +-1.8E308 |\r\n\r\n```java\r\nfunc main() {\r\n\tn := 3.14\r\n\tfmt.Printf(\"%v %T\\n\", n, n) //3.14 float64\r\n\tn = 13.7e72\r\n\tfmt.Printf(\"%v %T\\n\", n, n) //1.37e+73 float64\r\n\tn = 2.1e14\r\n\tfmt.Printf(\"%v %T\\n\", n, n) //2.1e+14 float64\r\n}\r\n```\r\n\r\n## Complex\r\n\r\ncomplex64, complex32 are numbers larger than float, used for data analysis.\r\n\r\n## String\r\nYou can treat string as an array, but when you take string\\[n], it will become byte, because string is actually another name for bytes in Go\r\n\r\n```java\r\nfunc main() {\r\n\ts := \"hello world\"\r\n\tfmt.Printf(\"%v, %T\\n\", s[2], s[2]) //108, uint8\r\n\tfmt.Printf(\"%v, %T\\n\", string(s[2]), s[2]) //l, uint8\r\n}\r\n```\r\n\r\nstring is immutable, and each element is byte, so it cannot be modified\r\n\r\n```java\r\nfunc main() {\r\n\ts := \"hello world\"\r\n\ts[2] = \"u\" //cannot assign to s[2] (value of type byte)\r\n\tfmt.Printf(\"%v, %T\\n\", s[2], s[2])\r\n}\r\n```\r\n\r\nBut strings can be added, after all arrays can also be added\r\n\r\n```java\r\nfunc main() {\r\n\ta := \"hello \"\r\n\ta = a + \"world\"\r\n\tfmt.Printf(\"%v, %T\\n\", a, a)\r\n}\r\n```\r\nstring can be converted into byte, it is often used between functions or when communicating with other applications.\r\n\r\n```java\r\nfunc main() {\r\n\ta := \"hello world\"\r\n\tb := []byte(a)\r\n\tfmt.Printf(\"%v, %T\\n\", b, b)\r\n\t//[104 101 108 108 111 32 119 111 114 108 100], []uint8\r\n}\r\n```\r\n\r\n## Rune\r\nstring is utf8, Rune is utf32, in utf32 it can be up to 32bits, but not necessarily 32bits.\r\n\r\nRune is another name for int32, declared in single quotes.\r\n\r\nThe difference with string is that even if rune is used as the type, it is still int32.\r\n```java\r\nfunc main() {\r\n\tvar a rune = 'a'\r\n\tb := 'b'\r\n\tfmt.Printf(\"%v %T\\n\", a, a) //97 int32\r\n\tfmt.Printf(\"%v %T\\n\", b, b) //98 int32\r\n}\r\n```\r\n\r\n> To process the data stream which is encoded into utf32, you can use a api called `ReadRune()`",
+      "data": {
+        "title": "Golang Basic - Primitives",
+        "date": "2023-05-10 21:14:01",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-primitives"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=14637)\r\n# Pointers\r\n## example\r\n```java\r\nfunc main() {\r\n\tvar a int = 45\r\n\tvar b *int = &a\r\n\tfmt.Println(a, *b)\r\n}\r\n\r\n45 45\r\n```\r\n\r\n## Use pointers to manipulate elements in array\r\n\r\n```java\r\nfunc main() {\r\n\ta := [3]int{1, 2, 3}\r\n\tb := &a[0]\r\n\tc := &a[1]\r\n\tfmt.Printf(\"%v %p %p\", a, b, c)\r\n}\r\n\r\n[1 2 3] 0xc000018180 0xc000018188\r\n```\r\n\r\n### In go, you cannot access the memory by mathematical operations.\r\n\r\n```java\r\nfunc main() {\r\n\ta := [3]int{1, 2, 3}\r\n\tb := &a[0]\r\n\tc := &a[1] - 8\r\n\tfmt.Printf(\"%v %p %p\", a, b, c)\r\n}\r\n\r\ninvalid operation: &a[1] - 8 (mismatched types *int and untyped int)\r\n```\r\n\r\n### It is also possible to create pointers to objects\r\n\r\n```java\r\nfunc main() {\r\n\tvar ms *myStruct = &myStruct{foo: 43}\r\n\tfmt.Println(ms)\r\n}\r\n\r\ntype myStruct struct {\r\n\tfoo int\r\n}\r\n\r\n&{43}\r\n```\r\n\r\n`new()` cannot specify a given value at creation time.\r\n\r\n```java\r\nfunc main() {\r\n\tvar ms *myStruct = new(myStruct)\r\n\tfmt.Println(ms)\r\n}\r\n\r\ntype myStruct struct {\r\n\tfoo int\r\n}\r\n\r\n&{0}\r\n```\r\n\r\n## The pointer's  initial value is nil, so remember to check first avoiding runtime error.\r\n\r\n```java\r\nfunc main() {\r\n\tvar ms *int\r\n\tfmt.Println(ms) \r\n}\r\n\r\n<nil>\r\n```\r\n\r\n### The method to get the value from the pointer object, line 4 is a syntax sugar.\r\n\r\n```java\r\nfunc main() {\r\n\tvar ms *myStruct = &myStruct{foo: 32}\r\n\tfmt.Println((*ms).foo)\r\n\tfmt.Println(ms.foo)\r\n}\r\n\r\n32\r\n32\r\n```\r\n\r\n## array vs slice\r\n\r\nBecause array is a fixed length, it stores data directly.\r\nBut the slice is the underlying projection of the array, which stores a pointer to the first element of the underlying array\r\nSo when copying, array is deep copy, but slice is shallow copy\r\n\r\n## Map\r\n\r\nLike Slice, a map stores a pointer to the first element of the underlying array.",
+      "data": {
+        "title": "Golang Basic - Pointers",
+        "date": "2023-05-10 21:09:47",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-pointers"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=8240)\r\n# Map\r\n\r\n*hashset*\r\n\r\n```java\r\nfunc main() {\r\n\tclassPopulations := map[string]int{\r\n\t\t\"A\": 33,\r\n\t\t\"B\": 41,\r\n\t\t\"C\": 37,\r\n\t}\r\n\tfmt.Println(classPopulations) //map[A:33 B:41 C:37]\r\n}\r\n```\r\n\r\nMost types (such as array) can be used as keys, but a few types (such as slices) cannot.\r\n\r\n```java\r\nfunc main() {\r\n\tm := map[[3]int]string{}\r\n\tfmt.Println(m)//map[]\r\n}\r\n```\r\n\r\nYou can also create a map with make()\r\n\r\n```java\r\nfunc main() {\r\n\tclassPopulations := make(map[string]int)\r\n\tclassPopulations = map[string]int{\r\n\t\t\"A\": 33,\r\n\t\t\"B\": 41, \r\n\t\t\"C\": 37,\r\n\t}\r\n\tfmt.Println(classPopulations)\r\n}\r\n```\r\n\r\nYou can directly add key-value into it\r\n\r\n```java\r\nfunc main() {\r\n\tclassPopulations := make(map[string]int)\r\n\tclassPopulations = map[string]int{\r\n\t\t\"A\": 33,\r\n\t\t\"B\": 41,\r\n\t\t\"C\": 37,\r\n\t}\r\n\tclassPopulations[\"D\"] = 55\r\n\tfmt.Println(classPopulations[\"D\"]) //55\r\n}\r\n```\r\n\r\nThe order of the map is not guaranteed unlike array or slice.\r\n\r\n`delete()` delete the key-value according to the key\r\n\r\n```java\r\nfunc main() {\r\n\tclassPopulations := make(map[string]int)\r\n\tclassPopulations = map[string]int{\r\n\t\t\"A\": 33,\r\n\t\t\"B\": 41,\r\n\t\t\"C\": 37,\r\n\t}\r\n\tdelete(classPopulations, \"A\")\r\n\tfmt.Println(classPopulations)\r\n}\r\n```\r\n\r\nIf the key does not exist in the map, it will return (zero-value false).\r\n\r\n```java\r\nfunc main() {\r\n\tclassPopulations := make(map[string]int)\r\n\tclassPopulations = map[string]int{\r\n\t\t\"A\": 33,\r\n\t\t\"B\": 41,\r\n\t\t\"C\": 37,\r\n\t}\r\n\tpop, ok := classPopulations[\"D\"]\r\n\tfmt.Println(pop, ok) //0 false\r\n}\r\n```\r\n\r\n`len()` can also take the number of key-values owned by the map\r\n\r\nmap is pass by reference\r\n\r\n```java\r\nfunc main() {\r\n\tclassPopulations := make(map[string]int)\r\n\tclassPopulations = map[string]int{\r\n\t\t\"A\": 33,\r\n\t\t\"B\": 41,\r\n\t\t\"C\": 37,\r\n\t}\r\n\tsc := classPopulations\r\n\tdelete(sc, \"C\")\r\n\tfmt.Println(sc) //map[A:33 B:41]\r\n\tfmt.Println(classPopulations) //map[A:33 B:41]\r\n}\r\n```",
+      "data": {
+        "title": "Golang Basic - Map",
+        "date": "2023-05-10 21:05:40",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-map"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=17879)\r\n# Interface\r\nAs same as other languages, the difference between interface and struct is that interface is a declaration behavior, not a data structure.\r\n## Example\r\nThe ConsoleWriter struct implements the interface on the second line\r\n\r\n```java\r\nfunc main() {\r\n\tvar w Writer = ConsoleWriter{}\r\n\tw.Write([]byte(\"hello Go!\"))\r\n}\r\n\r\ntype Writer interface {\r\n\tWrite([]byte) (int, error)\r\n}\r\n\r\ntype ConsoleWriter struct {\r\n}\r\n\r\n//method\r\nfunc (cw ConsoleWriter) Write(data []byte) (int, error) {\r\n\tn, err := fmt.Println(string(data))\r\n\treturn n, err\r\n}\r\n//hello Go!\r\n```\r\n\r\n## Name Rules\r\n\r\nThe naming should be related to the behavior. If there is only one behavior in the interface, name it as `(behavior)er`\r\n\r\n```java\r\ntype Writer interface {\r\n\tWrite([]byte) (int, error)\r\n}\r\n```\r\n\r\n## If there is a method, it can be implemented as an interface\r\n\r\n```java\r\nfunc main() {\r\n\tmyInt := IntCounter(0)\r\n\tvar inc Incrementer = &myInt\r\n\tfor i := 0; i < 3; i++ {\r\n\t\tfmt.Println(inc.Increment())\r\n\t}\r\n}\r\n\r\ntype Incrementer interface {\r\n\tIncrement() int\r\n}\r\n\r\ntype IntCounter int\r\n\r\nfunc (ic *IntCounter) Increment() int {\r\n\t*ic++\r\n\treturn int(*ic)\r\n}\r\n\r\n1\r\n2\r\n3\r\n```\r\n\r\n## Classic Example\r\n\r\nAfter merging the two interfaces, use struct to implement\r\n\r\n```java\r\nfunc main() {\r\n\tvar wc WriterCloser = NewBufferedWriterCloser()\r\n\twc.Write([]byte(\"Hello World, this is a test\"))\r\n\twc.Close()\r\n}\r\n\r\ntype Writer interface {\r\n\tWrite([]byte) (int, error)\r\n}\r\ntype Closer interface {\r\n\tClose() error\r\n}\r\n\r\ntype WriterCloser interface {\r\n\tWriter\r\n\tCloser\r\n}\r\n\r\ntype BufferedWriterCloser struct {\r\n\tbuffer *bytes.Buffer\r\n}\r\n\r\nfunc (bwc *BufferedWriterCloser) Write(data []byte) (int, error) {\r\n\tn, err := bwc.buffer.Write(data)\r\n\tif err != nil {\r\n\t\treturn 0, err\r\n\t}\r\n\t//Read 8 bytes at a time until the length is less than 8\r\n\tv := make([]byte, 8)\r\n\tfor bwc.buffer.Len() > 8 {\r\n\t\t_, err := bwc.buffer.Read(v)\r\n\t\tif err != nil {\r\n\t\t\treturn 0, err\r\n\t\t}\r\n\t\t_, err = fmt.Println(string(v))\r\n\t\tif err != nil {\r\n\t\t\treturn 0, err\r\n\t\t}\r\n\t}\r\n\treturn n, nil\r\n}\r\n\r\n//Read the remaining byte\r\nfunc (bwc *BufferedWriterCloser) Close() error {\r\n\tfor bwc.buffer.Len() > 0 {\r\n\t\tdata := bwc.buffer.Next(8)\r\n\t\t_, err := fmt.Println(string(data))\r\n\t\tif err != nil {\r\n\t\t\treturn err\r\n\t\t}\r\n\t}\r\n\treturn nil\r\n}\r\n\r\n//Return the pointer\r\nfunc NewBufferedWriterCloser() *BufferedWriterCloser {\r\n\treturn &BufferedWriterCloser{\r\n\t\tbuffer: bytes.NewBuffer([]byte{}),\r\n\t}\r\n}\r\n\r\nHello Wo\r\nrld, thi\r\ns is a t\r\nest\r\n```\r\n\r\n## Type Conversion\r\n\r\n```java\r\nfunc main() {\r\n\tvar wc WriterCloser = NewBufferedWriterCloser()\r\n\twc.Write([]byte(\"Hi\"))\r\n\twc.Close()\r\n\t\r\n\t//bwc is no longer WriterCloser but BufferedWriterCloser\r\n\tbwc := wc.(*BufferedWriterCloser)\r\n\tfmt.Println(bwc)\r\n}\r\n\r\nHi\r\n&{0xc0000241b0}\r\n```\r\n\r\n### To avoid type conversion error\r\n\r\ninstead of doing this then use recover\r\n\r\n```java\r\nfunc main() {\r\n\tvar wc WriterCloser = NewBufferedWriterCloser()\r\n\twc.Write([]byte(\"Hi\"))\r\n\twc.Close()\r\n\r\n\tbwc := wc.(io.Reader)\r\n\tfmt.Println(bwc)\r\n}\r\n\r\nHi\r\npanic: interface conversion: *main.BufferedWriterCloser is not io.Reader: missing method Read\r\n```\r\n\r\nwe can doing this\r\n\r\n```java\r\nfunc main() {\r\n\tvar wc WriterCloser = NewBufferedWriterCloser()\r\n\twc.Write([]byte(\"Hi\"))\r\n\twc.Close()\r\n\r\n\tr, ok := wc.(io.Reader)\r\n\tif ok {\r\n\t\tfmt.Println(r)\r\n\t} else {\r\n\t\tfmt.Println(\"Conversion failed\")\r\n\t}\r\n}\r\n\r\nHi\r\nConversion failed\r\n```\r\n\r\n### Change the above example to return value.\r\n\r\n```java\r\nfunc main() {\r\n\tvar wc WriterCloser = NewBufferedWriterCloser()\r\n\twc.Write([]byte(\"Hillo owworowro\"))\r\n\twc.Close()\r\n\r\n\tr, ok := wc.(BufferedWriterCloser)\r\n\tif ok {\r\n\t\tfmt.Println(r)\r\n\t} else {\r\n\t\tfmt.Println(\"Conversion failed\")\r\n\t}\r\n}\r\n\r\ntype Writer interface {\r\n\tWrite([]byte) (int, error)\r\n}\r\ntype Closer interface {\r\n\tClose() error\r\n}\r\n\r\ntype WriterCloser interface {\r\n\tWriter\r\n\tCloser\r\n}\r\n\r\ntype BufferedWriterCloser struct {\r\n\tbuffer *bytes.Buffer\r\n}\r\n\r\nfunc (bwc BufferedWriterCloser) Write(data []byte) (int, error) {\r\n\tn, err := bwc.buffer.Write(data)\r\n\tif err != nil {\r\n\t\treturn 0, err\r\n\t}\r\n\tv := make([]byte, 8)\r\n\tfor bwc.buffer.Len() > 8 {\r\n\t\t_, err := bwc.buffer.Read(v)\r\n\t\tif err != nil {\r\n\t\t\treturn 0, err\r\n\t\t}\r\n\t\t_, err = fmt.Println(string(v))\r\n\t\tif err != nil {\r\n\t\t\treturn 0, err\r\n\t\t}\r\n\t}\r\n\treturn n, nil\r\n}\r\n\r\nfunc (bwc BufferedWriterCloser) Close() error {\r\n\tfor bwc.buffer.Len() > 0 {\r\n\t\tdata := bwc.buffer.Next(8)\r\n\t\t_, err := fmt.Println(string(data))\r\n\t\tif err != nil {\r\n\t\t\treturn err\r\n\t\t}\r\n\t}\r\n\treturn nil\r\n}\r\n\r\nfunc NewBufferedWriterCloser() BufferedWriterCloser {\r\n\treturn BufferedWriterCloser{\r\n\t\tbuffer: bytes.NewBuffer([]byte{}),\r\n\t}\r\n}\r\n```\r\n\r\n## Interface with no method\r\n\r\nIt is very useful when testing the type of a variable. You can only declare an empty interface and you can always convert the type.\r\nBecause it is an empty interface, it cannot perform any behavior.\r\n\r\n### example 1\r\n\r\n```java\r\nfunc main(){\r\n\tvar wc interface{} = NewBufferedWriterCloser()\r\n}\r\ntype Writer interface {}\r\n```\r\n\r\n### example 2\r\n\r\nAn empty interface may hold values of any type. (Every type implements at least zero methods.)\r\n\r\nEmpty interfaces are used by code that handles values of unknown type. For example, `fmt.Print` takes any number of arguments of type `interface{}`.\r\n\r\n```java\r\nfunc main() {\r\n\tvar i interface{}\r\n\tdescribe(i)\r\n\r\n\ti = 42\r\n\tdescribe(i)\r\n\r\n\ti = \"hello\"\r\n\tdescribe(i)\r\n}\r\n\r\nfunc describe(i interface{}) {\r\n\tfmt.Printf(\"(%v, %T)\\n\", i, i)\r\n}\r\n\r\n(<nil>, <nil>)\r\n(42, int)\r\n(hello, string)\r\n```\r\n\r\n### example 3\r\n\r\nAnything can be put into an empty interface, even primitive types\r\n\r\n```java\r\nfunc main() {\r\n\tvar myObj interface{} = NewBufferedWriterCloser()\r\n\tif wc, ok := myObj.(WriterCloser); ok {\r\n\t\twc.Write([]byte(\"Hillo owworowro\"))\r\n\t\twc.Close()\r\n\t}\r\n\tr, ok := myObj.(BufferedWriterCloser)\r\n\tif ok {\r\n\t\tfmt.Println(r)\r\n\t} else {\r\n\t\tfmt.Println(\"Conversion failed\")\r\n\t}\r\n\tmyObj = 5\r\n\tfmt.Printf(\"%T %v\", myObj, myObj)\r\n}\r\n\r\nHillo ow\r\nworowro\r\n{0xc0000241b0}\r\nint 5\r\n```\r\n\r\n## Pointer receiver / Value receiver\r\n\r\n### example 1\r\n\r\nLine 2 is to pass the value of myWriterReader, so lines 20 and 21 must be value type\r\n\r\n```java\r\nfunc main() {\r\n\tvar m WriterReader = myWriterReader{}\r\n\tfmt.Println(m)\r\n}\r\n\r\ntype Writer interface {\r\n\tWrite()\r\n}\r\ntype Reader interface {\r\n\tRead()\r\n}\r\n\r\ntype WriterReader interface {\r\n\tWriter\r\n\tReader\r\n}\r\n\r\ntype myWriterReader struct{}\r\n\r\nfunc (m myWriterReader) Write() {}\r\nfunc (m myWriterReader) Read()  {}\r\n```\r\n\r\n### example 2\r\n\r\nLine 2 pass a pointer type, then 20 21 can be either value or pointer.\r\n\r\n```java\r\nfunc main() {\r\n\tvar m WriterReader = &myWriterReader{}\r\n\tfmt.Println(m)\r\n}\r\n\r\ntype Writer interface {\r\n\tWrite()\r\n}\r\ntype Reader interface {\r\n\tRead()\r\n}\r\n\r\ntype WriterReader interface {\r\n\tWriter\r\n\tReader\r\n}\r\n\r\ntype myWriterReader struct{}\r\n\r\nfunc (m *myWriterReader) Write() {}\r\nfunc (m myWriterReader) Read() {}\r\n```\r\n\r\n## Best Practice\r\n\r\n- Use many, small interface with one performance\r\n    - Single method interfaces are some of the most powerful and flexible\r\n        - io.Writer, io.Reader, interface{}\r\n- Don’t export interfaces for types that will be consumed\r\n    - Instead of export interface, it is better to export concrete type, so that you can define the interface you want for testing.\r\n    - If a package exports the behavior of A B C with interface, it needs to implement A B C, but C behavior may not be used, so it will look better to export struct at this time, and then write an interface with A B to receive it.\r\n- Do export interfaces for types that will be used by package\r\n    - If you’re creating a library that other people are going to consume, you can define the interface that you accept. And then they can provide whatever implementations that  they want.\r\n- Design functions and methods to receive interfaces whenever possible",
+      "data": {
+        "title": "Golang Basic - Interface",
+        "date": "2023-05-10 20:57:26",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-interface"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=10080)\r\n# If\r\n\r\n```java\r\nfunc main() {\r\n\tif true {\r\n\t\tfmt.Println(\"it will print out\")\r\n\t}\r\n}\r\n```\r\nCurly brackets cannot be removed, even if there is only one line to execute.\r\n.\r\n### initializer\r\n\r\nIf the variables is generated in this way, the scope will only be in the conditional expression.\r\n\r\n```java\r\nfunc main() {\r\n\tclassPop := map[string]int{\r\n\t\t\"A\": 55,\r\n\t\t\"B\": 37,\r\n\t}\r\n\tif pop, ok := classPop[\"A\"]; ok {\r\n\t\tfmt.Println(pop)//55\r\n\t}\r\n\tfmt.Println(pop) //undefined: pop\r\n}\r\n```\r\n\r\n### Conditional\r\n\r\n```java\r\nfunc main() {\r\n\tnumber := 50\r\n\tgoal := 70\r\n\tif number < 0 || number > 100 {\r\n\t\tfmt.Println(\"number is not between 0 and 100\")\r\n\t}\r\n\tfmt.Println(number > goal, number <= goal, number != goal, number == goal)\r\n}\r\n```\r\n\r\n### if else if else\r\n\r\n```java\r\nfunc main() {\r\n\tif ... {\r\n\t\r\n\t} else if ... {\r\n\t\r\n\t} else{\r\n\t\r\n\t}\r\n}\r\n```\r\n\r\n## Switch\r\n\r\n### No need to use `break`\r\n\r\n```java\r\nfunc main() {\r\n\tnum := 1\r\n\tswitch num {\r\n\tcase 1:\r\n\t\tfmt.Println(1)\r\n\tcase 2:\r\n\t\tfmt.Println(2)\r\n\tcase 10:\r\n\t\tfmt.Println(10)\r\n\tdefault:\r\n\t\tfmt.Println(\"??\")\r\n\t}\r\n}\r\n```\r\n\r\n### Comparing multiple values in one case\r\n\r\nOther languages, like PHP.\r\n\r\n```php\r\nswitch ($a){\r\n\t\tcase 1:\r\n\t\tcase 2:\r\n\t\tcase 3:\r\n\t\t\t\tprint(\"...\");\r\n\t\t\t\tbreak;\r\n\t\t...\r\n}\r\n```\r\n\r\nGo\r\n\r\n```java\r\nfunc main() {\r\n\tnum := 3\r\n\tswitch num {\r\n\tcase 1, 2, 3, 4:\r\n\t\tfmt.Println(1, 2, 3, 4)\r\n\tcase 10:\r\n\t\tfmt.Println(10)\r\n\tdefault:\r\n\t\tfmt.Println(\"??\")\r\n\t}\r\n}\r\n```\r\n\r\n### If repeated conditions in the statements, an error will be reported.\r\n\r\n```java\r\nfunc main() {\r\n\tnum := 3\r\n\tswitch num {\r\n\tcase 1, 2, 3, 4:\r\n\t\tfmt.Println(1, 2, 3, 4) //duplicate case 4 (constant of type int) in expression switch\r\n\tcase 10, 4:\r\n\t\tfmt.Println(10)\r\n\tdefault:\r\n\t\tfmt.Println(\"??\")\r\n\t}\r\n}\r\n```\r\n\r\n### Condition\r\n\r\nIf there are duplicates in the range, compare from top to bottom, and the first statement with true will be executed.\r\n\r\n```java\r\nfunc main() {\r\n\tnum := 5\r\n\tswitch {\r\n\tcase num < 10:\r\n\t\tfmt.Println(\"less than 10\")\r\n\tcase num < 20:\r\n\t\tfmt.Println(\"less than 20\")\r\n\tdefault:\r\n\t\tfmt.Println(\"??\")\r\n\t}\r\n}\r\n```\r\n\r\n### initializer\r\n\r\n```java\r\nfunc main() {\r\n\tswitch num := 2 + 1; num {\r\n\tcase 1, 2, 3, 4:\r\n\t\tfmt.Println(1, 2, 3, 4)\r\n\tcase 10:\r\n\t\tfmt.Println(10)\r\n\tdefault:\r\n\t\tfmt.Println(\"??\")\r\n\t}\r\n}\r\n```\r\n\r\nCan call other functions in switch\r\n\r\n```java\r\nfunc main() {\r\n\tswitch num, _ := test(); num {\r\n\tcase 1, 2, 3, 4:\r\n\t\tfmt.Println(1, 2, 3, 4)\r\n\tcase 10:\r\n\t\tfmt.Println(10)\r\n\tdefault:\r\n\t\tfmt.Println(\"??\")\r\n\t}\r\n}\r\nfunc test() (int, bool) {\r\n\treturn 3, true\r\n}\r\n```\r\n\r\n### fallthrough\r\n\r\nEven if the next layer of case does not meet the conditions, it will be executed, and there are not many opportunities to use fallthrough.\r\n\r\n```java\r\nfunc main() {\r\n\ti := 10\r\n\tswitch {\r\n\tcase i == 10:\r\n\t\tfmt.Println(10)\r\n\t\tfallthrough\r\n\tcase i == 20:\r\n\t\tfmt.Println(20)\r\n\t}\r\n}\r\n//10 20\r\n```\r\n\r\n### Switch with type\r\n\r\nIn the example, interface{} is used because interface{} can plug any type, and types can be compared in this way\r\nIf you use i := 1 or var i int = 1, it won't work, because i.(type) is an interface.\r\n\r\n```java\r\nfunc main() {\r\n\tvar i interface{} = 1\r\n\tswitch i.(type) {\r\n\tcase int:\r\n\t\tfmt.Println(\"it is int\") //print this line\r\n\tcase string:\r\n\t\tfmt.Println(\"it is string\")\r\n\t}\r\n}\r\n```\r\n\r\n```java\r\nfunc main() {\r\n\tvar i interface{} = [3]int{}\r\n\tswitch i.(type) {\r\n\tcase [2]int:\r\n\t\tfmt.Println(2)\r\n\tcase [3]int:\r\n\t\tfmt.Println(3) //this line will print out\r\n\t}\r\n}\r\n```\r\n\r\n### break\r\n\r\n```java\r\nfunc main() {\r\n\ti := 3\r\n\tswitch i {\r\n\tcase 1, 2, 3, 4:\r\n\t\tfmt.Println(1)\r\n\t\tfmt.Println(2)\r\n\t\tfmt.Println(3)\r\n\t\tbreak\r\n\t\tfmt.Println(4) //won't execute but it get error with unreachable code\r\n\t\t\t\t\t\t\t\t\t //might be different with other compiler\r\n\tcase 5:\r\n\t\tfmt.Println(5)\r\n\t}\r\n}\r\n```",
+      "data": {
+        "title": "Golang Basic - If and Switch Statements",
+        "date": "2023-05-10 20:49:45",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-if-and-switch-statements"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=20037)\r\n# GoRoutines\r\nConcurrent and Parallel\r\n## Creating goroutines\r\nA simple example, time.Sleep is needed because main() ends too soon for the goroutines to print\r\n\r\n```java\r\nfunc main() {\r\n\tgo sayHello()\r\n\ttime.Sleep(100 * time.Microsecond)\r\n}\r\nfunc sayHello() {\r\n\tfmt.Println(\"hello\")\r\n}\r\n\r\nhello\r\n```\r\n\r\nGoroutines can also be used in anonymous functions, `msg` will use the nearest variable\r\n\r\n```java\r\nfunc main() {\r\n\tvar msg = \"Hello\"\r\n\tgo func() {\r\n\t\tfmt.Println(msg)\r\n\t}()\r\n\ttime.Sleep(100 * time.Microsecond)\r\n}\r\n\r\nHello\r\n```\r\n### Race condition\r\nThe main function is executed too fast and the resource of msg is changed, so that goroutines will also be affected.\r\n\r\n```java\r\nfunc main() {\r\n\tvar msg = \"Hello\"\r\n\tgo func() {\r\n\t\tfmt.Println(msg)\r\n\t}()\r\n\tmsg = \"goodnight\"\r\n\ttime.Sleep(100 * time.Microsecond)\r\n}\r\n\r\ngoodnight\r\n```\r\n\r\n## Synchronization\r\n\r\n### WaitGroups\r\n\r\nBasic usage, `wg.Done()` will automatically minus the counter with one, `wg.Add(1)` will add one to the counter, `wg.Wait()` will pause until the counter is zero\r\n\r\n```java\r\nfunc main() {\r\n\tvar msg = \"Hello\"\r\n\twg.Add(1)\r\n\tgo func() {\r\n\t\tfmt.Println(msg)\r\n\t\twg.Done()\r\n\t}()\r\n\twg.Wait()\r\n\tmsg = \"goodnight\"\r\n}\r\n```\r\n\r\nFrom the following example, although WaitGroup is useful, the execution is still a mess. The only improvement point is that the output is ordered.\r\n\r\n```java\r\nvar wg = sync.WaitGroup{}\r\nvar counter = 0\r\n\r\nfunc main() {\r\n\tfor i := 0; i < 10; i++ {\r\n\t\twg.Add(2)\r\n\t\tgo sayHello()\r\n\t\tgo increment()\r\n\t}\r\n\twg.Wait()\r\n}\r\n\r\nfunc sayHello() {\r\n\tfmt.Println(counter)\r\n\twg.Done()\r\n}\r\n\r\nfunc increment() {\r\n\tcounter++\r\n\twg.Done()\r\n}\r\n\r\n0\r\n2\r\n4\r\n5\r\n6\r\n7\r\n8\r\n9\r\n10\r\n10\r\n```\r\n\r\n### Mutexes (Lock)\r\n\r\nAlthough the lock is added, because each thread is still executed, the result will still change.\r\n\r\n```java\r\nvar wg = sync.WaitGroup{}\r\nvar counter = 0\r\nvar m = sync.RWMutex{}\r\n\r\nfunc main() {\r\n\tfor i := 0; i < 10; i++ {\r\n\t\twg.Add(2)\r\n\t\tgo sayHello()\r\n\t\tgo increment()\r\n\t}\r\n\twg.Wait()\r\n}\r\n\r\nfunc sayHello() {\r\n\tm.RLock()\r\n\tfmt.Println(counter)\r\n\tm.RUnlock()\r\n\twg.Done()\r\n}\r\n\r\nfunc increment() {\r\n\tm.Lock()\r\n\tcounter++\r\n\tm.Unlock()\r\n\twg.Done()\r\n}\r\n\r\n0\r\n1\r\n1\r\n1\r\n1\r\n1\r\n1\r\n1\r\n1\r\n1\r\n```\r\n\r\nAfter improvement, the results are finally in order.\r\n\r\n```java\r\nvar wg = sync.WaitGroup{}\r\nvar counter = 0\r\nvar m = sync.RWMutex{}\r\n\r\nfunc main() {\r\n\tfor i := 0; i < 10; i++ {\r\n\t\twg.Add(2)\r\n\t\tm.RLock()\r\n\t\tgo sayHello()\r\n\t\tm.Lock()\r\n\t\tgo increment()\r\n\t}\r\n\twg.Wait()\r\n}\r\n\r\nfunc sayHello() {\r\n\tfmt.Println(counter)\r\n\tm.RUnlock()\r\n\twg.Done()\r\n}\r\n\r\nfunc increment() {\r\n\tcounter++\r\n\tm.Unlock()\r\n\twg.Done()\r\n}\r\n\r\n0\r\n1\r\n2\r\n3\r\n4\r\n5\r\n6\r\n7\r\n8\r\n9\r\n```\r\n\r\nThis is an exercise purely as an example, not a good exercise, because the advantages of parallelism and concurrency are gone, and the execution speed and resources are even worse.\r\n\r\n### `runtime.GOMAXPROCS()`\r\n\r\n```java\r\nfunc main() {\r\n\tfmt.Println(runtime.GOMAXPROCS(-1))\r\n}\r\n\r\n20\r\n```\r\n\r\n`runtime.GOMAXPROCS(n)` is adjusted to use n threads, -1 means do not adjust and return the currently set thread nums\r\n\r\n```java\r\nfunc main() {\r\n\truntime.GOMAXPROCS(30)\r\n\tfmt.Println(runtime.GOMAXPROCS(-1))\r\n}\r\n\r\n30\r\n```\r\n\r\nIf n = 1, it is a single thread\r\n\r\n```java\r\nfunc main() {\r\n\truntime.GOMAXPROCS(1)\r\n\tfmt.Println(runtime.GOMAXPROCS(-1))\r\n}\r\n```\r\n\r\nBecause it is a single thread, so everything is in order, after the above example is added, it will follow the order obediently. This purpose is to ensure the order is correct to avoid any race condition.\r\n\r\n```java\r\nfunc main() {\r\n\truntime.GOMAXPROCS(1)\r\n\tfor i := 0; i < 10; i++ {\r\n\t\twg.Add(2)\r\n\t\tgo sayHello()\r\n\t\tgo increment()\r\n\t}\r\n\twg.Wait()\r\n}\r\n\r\nfunc sayHello() {\r\n\tfmt.Println(counter)\r\n\twg.Done()\r\n}\r\n\r\nfunc increment() {\r\n\tcounter++\r\n\twg.Done()\r\n}\r\n\r\n1\r\n2\r\n3\r\n4\r\n5\r\n6\r\n7\r\n8\r\n9\r\n10\r\n```\r\n\r\n## Best Practices\r\n\r\n- Don’t create goroutines in libraries\r\n    - Let consumer control concurrency\r\n- When creating a goroutine, know how it will end\r\n    - Avoids subtle memory leaks\r\n- Check for race conditions at compile time (need to use cgo, I did not open that.)",
+      "data": {
+        "title": "Golang Basic - GoRoutines",
+        "date": "2023-05-10 20:42:41",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-goroutines"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=15690)\r\n# Function\r\n## example\r\n```java\r\nfunc test(a int, b *int) (int, bool, string) {\r\n\treturn 5, true, \"hello\"\r\n}\r\n```\r\n\r\n### params are same type\r\n\r\n```java\r\nfunc test(a, b int, c string) {\r\n\t\r\n}\r\n```\r\n\r\n## Passing a pointer\r\n\r\nParameter can be a pointer. When a large object is passed in, the original operation will be to copy a new object, but if it is a pointer, it will save memory and speed. Be careful because it is passed in pointer, the original object will also be changed.\r\n\r\n## variadic paramter\r\n\r\nTurn the parameters passed in later into slices.\r\n\r\n```java\r\nfunc main() {\r\n\tsum(\"sum\", 1, 2, 3, 4, 5)\r\n}\r\nfunc sum(a string, values ...int) {\r\n\tfmt.Println(a, values)\r\n}\r\n\r\nsum [1 2 3 4 5]\r\n```\r\n\r\n## 回傳pointer\r\n\r\nWhen Go finds that the returned value is about to be released, Go will put this value into shared memory, so this value will not be released, and it may not have the same behavior in other languages.\r\n\r\n```java\r\nfunc main() {\r\n\tfmt.Println(*test())\r\n}\r\nfunc test() *int {\r\n\tresult := 5\r\n\treturn &result\r\n}\r\n\r\n5\r\n```\r\n\r\n## Name return value\r\n\r\nCreate a variable in the returned parameter, and then automatically specify this variable when returning, which is a return sugar.\r\n\r\n```java\r\nfunc main() {\r\n\tfmt.Println(test(1, 2, 3))\r\n}\r\nfunc test(values ...int) (result int) {\r\n\tfor _, v := range values {\r\n\t\tresult += v\r\n\t}\r\n\treturn\r\n}\r\n\r\n6\r\n```\r\n\r\n## Return multiple values\r\n\r\nIt's very common in Go to return value and error\r\n\r\n```java\r\nfunc main() {\r\n\td, err := divide(5.0, 0.0)\r\n\tif err != nil {\r\n\t\tfmt.Println(err)\r\n\t\treturn\r\n\t}\r\n\tfmt.Println(d)\r\n}\r\n\r\nfunc divide(a, b float64) (float64, error) {\r\n\tif b == 0.0 {\r\n\t\treturn 0.0, fmt.Errorf(\"cannot divide by zero\")\r\n\t}\r\n\treturn a / b, nil\r\n}\r\n```\r\n\r\n## Passing through anonymous function\r\n\r\nThe change of the value inside will not affect the value outside, just like passing value to other function.\r\n\r\n```java\r\nfunc main() {\r\n\tfor i := 0; i < 5; i++ {\r\n\t\tfunc(i int) {\r\n\t\t\ti++\r\n\t\t\tfmt.Println(i)\r\n\t\t}(i)\r\n\t}\r\n}\r\n\r\n1\r\n2\r\n3\r\n4\r\n5\r\n```\r\n\r\nIf it is written in the following way, the function does not pass any parameters, but directly takes the nearest scope variable, so the changes made inside will change the outside value.\r\n\r\n```java\r\nfunc main() {\r\n\tfor i := 0; i < 5; i++ {\r\n\t\tfunc() {\r\n\t\t\ti++\r\n\t\t\tfmt.Println(i)\r\n\t\t}()\r\n\t}\r\n}\r\n\r\n1\r\n3\r\n5\r\n```\r\n\r\n### Create anonymous function as variable\r\n\r\nPut the anonymous function into the variable, and it can be passed to other functions\r\n\r\n```java\r\nfunc main() {\r\n\tf := func(i int) {\r\n\t\ti++\r\n\t\tfmt.Println(i)\r\n\t}\r\n\tfor i := 0; i < 5; i++ {\r\n\t\tf(i)\r\n\t}\r\n}\r\n```\r\n\r\nAnother way\r\n\r\n```java\r\nfunc main() {\r\n\tvar f func(int) = func(i int) {\r\n\t\ti++\r\n\t\tfmt.Println(i)\r\n\t}\r\n\tfor i := 0; i < 5; i++ {\r\n\t\tf(i)\r\n\t}\r\n}\r\n```\r\n\r\nWith return\r\n\r\n```java\r\nfunc main() {\r\n\tvar f func(int) int = func(i int) int {\r\n\t\ti++\r\n\t\tfmt.Println(i)\r\n\t\treturn i\r\n\t}\r\n\tfor i := 0; i < 5; i++ {\r\n\t\tf(i)\r\n\t}\r\n}\r\n```\r\n\r\n### Pass in function, execute, return\r\n\r\nFunction with no return\r\n\r\n```java\r\nfunc main() {\r\n\texecFunc(\"sum\", func(str string, value []int) {\r\n\t\tresult := 0\r\n\t\tfor _, i := range value {\r\n\t\t\tresult += i\r\n\t\t}\r\n\t\tfmt.Println(result)\r\n\t}, 1, 2, 3, 4, 5)\r\n\r\n}\r\nfunc execFunc(str string, f func(str string, value []int), value ...int) {\r\n\tf(str, value)\r\n}\r\n```\r\n\r\nFunction with return parameters.\r\n\r\n```java\r\nfunc main() {\r\n\tvalue, err := execFunc(\"sum\", func(str string, value []int) (int, error) {\r\n\t\tif len(value) == 0 {\r\n\t\t\treturn 0, fmt.Errorf(\"length of values must more than 0\")\r\n\t\t}\r\n\t\tresult := 0\r\n\t\tfor _, i := range value {\r\n\t\t\tresult += i\r\n\t\t}\r\n\t\treturn result, nil\r\n\t}, 1, 2, 3, 4, 5)\r\n\tif err != nil {\r\n\t\tfmt.Println(err)\r\n\t\treturn\r\n\t}\r\n\tfmt.Println(value)\r\n\r\n}\r\nfunc execFunc(str string, f func(str string, value []int) (int, error), value ...int) (int, error) {\r\n\treturn f(str, value)\r\n}\r\n\r\n15\r\n```\r\n\r\n## Method\r\n\r\n```java\r\nfunc main() {\r\n\tg := greeter{\r\n\t\tgreeting: \"Hello,\",\r\n\t\tname:     \"John\",\r\n\t}\r\n\tg.greet()\r\n}\r\n\r\ntype greeter struct {\r\n\tgreeting string\r\n\tname     string\r\n}\r\n\r\nfunc (g greeter) greet() {\r\n\tfmt.Println(g.greeting, g.name)\r\n}\r\n\r\nHello, John\r\n```\r\n\r\nAt line 14, the operation is the copy of the object, not the object itself, so even if it is modified, it will not affect the original value.\r\n\r\n```java\r\nfunc (g greeter) greet() {\r\n\tfmt.Println(g.greeting, g.name)\r\n\tg.name = \"Amy\" //ineffective assignment to field greeter.name\r\n}\r\n```\r\n\r\nOf course, the parameter passed in line 14 can also be a pointer, which will affect the original value.\r\n\r\n```java\r\nfunc main() {\r\n\tg := greeter{\r\n\t\tgreeting: \"Hello,\",\r\n\t\tname:     \"John\",\r\n\t}\r\n\tg.greet()\r\n\tg.greet()\r\n}\r\n\r\ntype greeter struct {\r\n\tgreeting string\r\n\tname     string\r\n}\r\n\r\nfunc (g *greeter) greet() {\r\n\tfmt.Println(g.greeting, g.name)\r\n\tg.name = \"\"\r\n}\r\n\r\nHello, John\r\nHello,\r\n```",
+      "data": {
+        "title": "Golang Basic - Function",
+        "date": "2023-05-10 20:36:03",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-function"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=12077)\r\n# For loop\r\n## Simple loop\r\n### Only non-declaration in for loop initializer\r\n\r\n```java\r\nfunc main() {\r\n\tfor i := 0; i < 5; i++ {\r\n\t\tfmt.Println(i)\r\n\t}\r\n}\r\n```\r\n\r\n### Multiple variable example. Note that you cannot use i++, j++.\r\n\r\n```java\r\nfunc main() {\r\n\tfor i, j := 0, 0; i < 5 && j < 4; i, j = i+1, j+2 {\r\n\t\tfmt.Println(i, j)\r\n\t}\r\n}\r\n```\r\n\r\n### Scope\r\n\r\n```java\r\nfunc main() {\r\n\t// i scope only for loop\r\n\tfor i := 0; i < 5; i++ {\r\n\t\tfmt.Println(i)\r\n\t}\r\n}\r\n```\r\n\r\n```java\r\nfunc main() {\r\n\ti := 0 //scope in main func\r\n\tfor ; i < 5; i++ {\r\n\t\tfmt.Println(i)\r\n\t}\r\n}\r\n```\r\n\r\n### use it like while loop\r\n\r\n```java\r\nfunc main() {\r\n\ti := 0\r\n\tfor i < 5 {\r\n\t\t\tfmt.Println(i)\r\n\t\t\ti++\r\n\t}\r\n}\r\n```\r\n\r\n### break\r\n\r\n```java\r\nfunc main() {\r\n\t\ti := 0\r\n\t\tfor {\r\n\t\t\t\tfmt.Println(i)\r\n\t\t\t\tif i == 5 {\r\n\t\t\t\t\t\tbreak\r\n\t\t\t\t}\r\n\t\t\t\ti++\r\n\t\t}\r\n}\r\n```\r\n\r\n### continue\r\n\r\n```java\r\nfunc main() {\r\n\t\ti := 0\r\n\t\tfor i < 10 {\r\n\t\t\t\ti++\r\n\t\t\t\tif i%2 == 0 {\r\n\t\t\t\t\t\tfmt.Println(i) //2 4 6 8 10\r\n\t\t\t\t\t\tcontinue\r\n\t\t\t\t}\r\n\t\t}\r\n}\r\n```\r\n\r\n### Label\r\n\r\nBecause break will only stop the nearest loop, you can use Label when encountering a nested loop\r\n\r\nLabel does not have to be called \"Loop\"\r\n\r\n```java\r\nfunc main() {\r\nLoop:\r\n\tfor i := 1; i <= 3; i++ {\r\n\t\tfor j := 1; j <= 3; j++ {\r\n\t\t\tfmt.Println(i * j)\r\n\t\t\tif i*j >= 6 {\r\n\t\t\t\tbreak Loop\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n```\r\n\r\n## Loop through collection\r\n\r\n### Collection can be slice, array, map, string\r\n\r\n```java\r\nfunc main() {\r\n\ts := []int{3, 6, 9}\r\n\tfor k, v := range s {\r\n\t\tfmt.Println(k, v)\r\n\t}\r\n}\r\n\r\n0 3\r\n1 6\r\n2 9\r\n```\r\n\r\n### map\r\n\r\n```java\r\nfunc main() {\r\n\tclassPopulations := map[string]int{\r\n\t\t\"A\": 33,\r\n\t\t\"B\": 41,\r\n\t\t\"C\": 37,\r\n\t}\r\n\t//It can be noticed that the loop of the map will not be in order\r\n\tfor k, v := range classPopulations {\r\n\t\tfmt.Println(k, v)\r\n\t}\r\n}\r\n\r\nB 41\r\nC 37\r\nA 33\r\n```\r\n\r\n### string\r\n\r\nBecause String actually stores bytes, so pay attention to converting to string when using.\r\n\r\n```java\r\nfunc main() {\r\n\ts := \"hello world\"\r\n\tfor k, v := range s {\r\n\t\tfmt.Println(k, string(v))\r\n\t}\r\n}\r\n\r\n0 h\r\n1 e\r\n2 l\r\n3 l\r\n4 o\r\n5  \r\n6 w\r\n7 o\r\n8 r\r\n9 l\r\n10 d\r\n```\r\n\r\n### _ (underscore)\r\n\r\nBecause Go insists that every variable must be used, underscore can be used if you don't want to use this variable.\r\n\r\n```java\r\nfunc main() {\r\n\t\ts := \"hello world\"\r\n\t\tfor _, v := range s {\r\n\t\t\t\tfmt.Println(string(v))\r\n\t\t}\r\n}\r\n```",
+      "data": {
+        "title": "Golang Basic - For loop",
+        "date": "2023-05-10 20:30:20",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-for-loop"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=13294)\r\n# Control Flow\r\n\r\n## Defer\r\n\r\n### Do it until it is time to return.\r\n\r\n```java\r\nfunc main() {\r\n\tfmt.Println(\"start\")\r\n\tdefer fmt.Println(\"middle\")\r\n\tfmt.Println(\"end\")\r\n}\r\n\r\nstart\r\nend\r\nmiddle\r\n```\r\n\r\n### defer is LIFO, just like stack\r\n\r\n```java\r\nfunc main() {\r\n\tdefer fmt.Println(\"start\")\r\n\tdefer fmt.Println(\"middle\")\r\n\tdefer fmt.Println(\"end\")\r\n}\r\n\r\nend\r\nmiddle\r\nstart\r\n```\r\n\r\nBecause defer is not executed until the end of the function, if it is used in the loop, it may cause a large amount of memory to be unable to be released until the end of the function, not the end of the loop.\r\n\r\n```java\r\nfunc main() {\r\n\tfor i := 0; i < 2; i++ {\r\n\t\tdefer fmt.Println(\"defer\", i)\r\n\t\tfmt.Println(\"normal\", i)\r\n\t}\r\n\tfmt.Println(\"AA\")\r\n}\r\n\r\nnormal 0\r\nnormal 1\r\nAA\r\ndefer 1\r\ndefer 0\r\n```\r\n\r\nIf you want to use defer functions in the loop, such as releasing resources after fetch api, you can put them in a new function.\r\n\r\n```java\r\nfunc main() {\r\n\tfor i := 0; i < 2; i++ {\r\n\t\ttest(i)\r\n\t}\r\n\tfmt.Println(\"AA\")\r\n}\r\nfunc test(i int) {\r\n\tdefer fmt.Println(\"defer\", i)\r\n\tfmt.Println(\"normal\", i)\r\n}\r\n\r\nnormal 0\r\ndefer 0\r\nnormal 1\r\ndefer 1\r\nAA\r\n```\r\n\r\n### The variables in defer are taken at the moment, not before return\r\n\r\n```java\r\nfunc main() {\r\n\t\ta := 1\r\n\t\tdefer fmt.Println(a)\r\n\t\ta = 2\r\n}\r\n\r\n1\r\n```\r\n\r\n## Panic (exception)\r\nPanic is not necessarily a fatal error, as long as the application knows how to deal with panic, otherwise the program will be stopped.\r\n\r\n```java\r\nfunc main() {\r\n\tfmt.Println(\"start\")\r\n\tpanic(\"nono\")\r\n\tfmt.Println(\"end\")\r\n}\r\n\r\nstart\r\npanic: nono\r\n```\r\n\r\n### Interaction between panic and defer\r\n\r\ndefer will be executed before return, and panic will cause the application to end, so defer will be executed before panic.\r\n\r\n```java\r\nfunc main() {\r\n\tfmt.Println(\"start\")\r\n\tdefer fmt.Println(\"deffered\")\r\n\tpanic(\"nono\")\r\n\tfmt.Println(\"end\")\r\n}\r\n\r\nstart\r\ndeffered\r\npanic: nono\r\n```\r\n\r\n## Recover\r\n\r\nBefore reading recover, you must first know how to write anonymous functions\r\n\r\n### callback & anonymous function\r\n\r\nfunc(){...}() is an anonymous function, the front is written as func (like callback), and the back () means to be executed\r\n\r\n```java\r\nfunc main() {\r\n\ttest(func() { fmt.Println(123) })\r\n}\r\nfunc test(a func()) {\r\n\ta()\r\n}\r\n\r\n123\r\n```\r\n\r\n### Now use recover() inside the anonymous function\r\n\r\nBecause defer will be executed before panic, it means that Exception has already occurred. If there is no exception, recover will return nil.\r\n\r\n```java\r\nfunc main() {\r\n\tfmt.Println(\"start\")\r\n\tdefer func() {\r\n\t\tif err := recover(); err != nil {\r\n\t\t\tfmt.Println(\"Error:\", err)\r\n\t\t}\r\n\t}()\r\n\tpanic(\"nono\")\r\n\tfmt.Println(\"end\")\r\n}\r\n\r\nstart\r\nError: nono\r\n```\r\n\r\n### stack function\r\n\r\nAs long as the panic has a recover to catch it, the higher-level function will not interrupt the execution due to the panic, but the function of the panic itself will be interrupted.\r\n\r\n```java\r\nfunc main() {\r\n\tfmt.Println(\"start\")\r\n\ttest()\r\n\tfmt.Println(\"end\")\r\n}\r\nfunc test() {\r\n\tfmt.Println(\"start test\")\r\n\tdefer func() {\r\n\t\tif err := recover(); err != nil {\r\n\t\t\tfmt.Println(\"Error:\", err)\r\n\t\t}\r\n\t}()\r\n\tpanic(\"nono\")\r\n\tfmt.Println(\"end test\")\r\n}\r\n\r\nstart\r\nstart test\r\nError: nono\r\nend\r\n```\r\n\r\n### Throw new exception in recover\r\n\r\nIf the error cannot be handled with recover(), you can use panic() again and throw the exception to the upper function.\r\n\r\n```java\r\nfunc main() {\r\n\tfmt.Println(\"start\")\r\n\tdefer func() {\r\n\t\tif err := recover(); err != nil {\r\n\t\t\tfmt.Println(\"Error from test:\", err)\r\n\t\t}\r\n\t}()\r\n\ttest()\r\n\tfmt.Println(\"end\")\r\n}\r\nfunc test() {\r\n\tfmt.Println(\"start test\")\r\n\tdefer func() {\r\n\t\tif err := recover(); err != nil {\r\n\t\t\tfmt.Println(\"Error:\", err)\r\n\t\t\tpanic(err)\r\n\t\t}\r\n\t}()\r\n\tpanic(\"nono\")\r\n\tfmt.Println(\"end test\")\r\n}\r\n\r\nstart\r\nstart test\r\nError: nono\r\nError from test: nono\r\n```",
+      "data": {
+        "title": "Golang Basic - Control Flow",
+        "date": "2023-05-10 20:24:04",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-control-flow"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=5189)\r\n# Constants\r\n\r\n## Declaration\r\n\r\n```java\r\nfunc main() {\r\n\tconst myConst ...\r\n\t//Not MYCONST because it will be exported (variable name rules)\r\n}\r\n```\r\n\r\nIt won't get error if you declare a const variable then not use it.\r\n\r\n```java\r\nfunc main() {\r\n\tconst a = 5\r\n\tconst b = 6\r\n\tfmt.Printf(\"%v %T\\n\", a, a)\r\n}\r\n//no error\r\n```\r\n\r\n## Type Constant\r\n\r\nconst is like var, but const cannot be modified\r\n\r\n```java\r\nfunc main() {\r\n\tconst myConst int = 42\r\n\tfmt.Printf(\"%v %T\\n\", myConst, myConst)\r\n\tmyConst = 66 //cannot assign to myConst (constant 42 of type int)\r\n}\r\n```\r\n\r\nIf the value of constant is defined at runtime, it cannot be declared\r\n\r\n```java\r\nfunc main() {\r\n\tconst myConst float64 = math.Sin(1.57) //math.Sin(1.57) (value of type float64) is not constant\r\n\tconst b int = test() //b() (value of type int) is not constant\r\n\tfmt.Printf(\"%v %T\\n\", myConst, myConst)\r\n}\r\nfunc test() int {\r\n\treturn 30\r\n}\r\n```\r\n\r\nArray (collection) is mutable, so it cannot be declared as constant\r\nConstant can be shadowed\r\n\r\n```java\r\nconst a int16 = 33\r\nconst b int16 = 31\r\n\r\nfunc main() {\r\n\tconst a int8 = 3\r\n\tvar b int8 = 5\r\n\tfmt.Printf(\"%v %T\\n\", a, a) //3 int8\r\n\tfmt.Printf(\"%v %T\\n\", b, b) //5 int8\r\n}\r\n```\r\n\r\nThere is actually no need to add a type (non-declaration) when const is declared\r\n\r\n```java\r\nfunc main() {\r\n\tconst a = 3\r\n\tfmt.Printf(\"%v %T\\n\", a, a) //3 int\r\n}\r\n```\r\n\r\nWhat's interesting about non-declaration is that although different types of integer can't be added together, the compiler will judge by itself and change the type.\r\nThis behavior is what var does not have in non-declaration.\r\n\r\n```java\r\nfunc main() {\r\n\tconst a = 3\r\n\tvar b int16 = 688\r\n\tfmt.Printf(\"%v %T\\n\", a+b, a+b) //691 int16\r\n}\r\n```\r\n\r\nThe compiler will automatically convert type.\r\n\r\n```java\r\nfunc main() {\r\n\tconst a = 42\r\n\tvar b int16 = 688\r\n\tvar c int8 = 55\r\n\tfmt.Printf(\"%v %T\\n\", a+b, a+b) //730 int16\r\n\tfmt.Printf(\"%v %T\\n\", a+c, a+c) //97 int8\r\n}\r\n```\r\n\r\ncounterexample\r\n\r\n```java\r\nfunc main() {\r\n\tconst a int8 = 3 //Declare the type first.\r\n\tvar b int16 = 688\r\n\tfmt.Printf(\"%v %T\\n\", a+b, a+b) //invalid operation: a + b (mismatched types int8 and int16)\r\n}\r\n```\r\n\r\nThe difference from var is that when using a block, if the next variable has no assigned value, the value assigned above will be used\r\n\r\n```java\r\nconst (\r\n\ta = 5\r\n\tb = \"hello\"\r\n\tc\r\n)\r\n\r\nfunc main() {\r\n\tfmt.Printf(\"%v %T\\n\", c, c) //hello string\r\n}\r\n```\r\n\r\n## enumerated constant\r\n\r\niota, which can only be used for constant, is an enumeration constant (counter), starting with 0, and will be +1 every time it is declared in the constant block\r\n\r\nDoes not overlap between different constant blocks\r\n\r\n```java\r\nconst a = iota\r\nconst (\r\n\tb = iota\r\n\tc\r\n)\r\nconst (\r\n\td = iota\r\n)\r\n\r\nfunc main() {\r\n\tfmt.Printf(\"%v %T\\n\", a, a) //0 int\r\n\tfmt.Printf(\"%v %T\\n\", b, b) //0 int\r\n\tfmt.Printf(\"%v %T\\n\", c, c) //1 int\r\n\tfmt.Printf(\"%v %T\\n\", d, d) //0 int\r\n}\r\n```\r\n\r\niota can use addition, subtraction, multiplication and division to do offset\r\n\r\n```java\r\nconst (\r\n\ta = iota + 2\r\n\tb //iota + 2\r\n\tc = iota - 2\r\n\td //iota - 2\r\n)\r\n\r\nfunc main() {\r\n\tfmt.Printf(\"%v\\n\", a) //2\r\n\tfmt.Printf(\"%v\\n\", b) //3\r\n\tfmt.Printf(\"%v\\n\", c) //0\r\n\tfmt.Printf(\"%v\\n\", d) //1\r\n}\r\n```\r\n\r\n## The case of using iota\r\n\r\n### Give constants to different states and check them in the program\r\n\r\n```java\r\nconst (\r\n\t_ = iota\r\n\tnormal\r\n\thard\r\n\tveryHard\r\n)\r\n\r\nfunc main() {\r\n\tvar difficulty int = normal\r\n\t\tif difficulty == normal {\r\n\t\t\t//do something in normal difficulty\r\n\t\t}\r\n}\r\n```\r\n\r\nBeware that iota starts from zero. If the first constant is not declared as _ (directly discarded), it usually declare as error variable.\r\n\r\n```java\r\nconst (\r\n\terr = iota\r\n\tnormal\r\n\thard\r\n\tveryHard\r\n)\r\n\r\nfunc main() {\r\n\tvar difficulty int\r\n\tif difficulty == error {\r\n\t\tfmt.Println(\"error because difficulty is zero-value\")\r\n\t\t//this line will print out\r\n\t}\r\n}\r\n```\r\n\r\n### bit shifting with iota\r\n\r\n```java\r\nconst (\r\n\t_  = iota\r\n\tKB = 1 << (10 * iota)\r\n\tMB\r\n\tGB\r\n)\r\n\r\nfunc main() {\r\n\tfileSize := 4000000000.\r\n\tfmt.Printf(\"%.2fGB\", fileSize/GB) //3.73GB\r\n}\r\n```\r\n\r\n### Boolean flags for Storing Permissions\r\n\r\n```java\r\nconst (\r\n\tisAdmin = 1 << iota\r\n\tisMember\r\n\tisVisitor\r\n\r\n\tcanSeeA\r\n\tcanSeeB\r\n\tcanSeeC\r\n)\r\n\r\nfunc main() {\r\n\tvar role byte = isAdmin | canSeeA | canSeeB\r\n\tfmt.Printf(\"%b\\n\", role) //11001\r\n\tif role&isAdmin == isAdmin {\r\n\t\t\tfmt.Printf(\"isAdmin\") //will print out\r\n\t}\r\n}\r\n```",
+      "data": {
+        "title": "Golang Basic - Constants",
+        "date": "2023-05-10 20:14:31",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-constants"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=21910)\r\n# Channel\r\n\r\nFor communicating data between goroutines\r\n\r\n## Example\r\n\r\n`i := ← ch`Get the first element in the channel\r\n\r\n`ch ← 5`Push elements into the channel\r\n\r\n`ch := make(chan int)`Create an integer channel with a space of 1\r\n\r\nChannel can be specified as any type, even struct, but after specifying, the channel can only hold this type, which is like an array\r\nA space of 1 means that no new elements can be placed in the channel before the elements in the channel have been discharged or you will get an out of index error.\r\n\r\n```java\r\nvar wg = sync.WaitGroup{}\r\n\r\nfunc main() {\r\n\tch := make(chan int)\r\n\twg.Add(2)\r\n\tgo func() {\r\n\t\ti := <-ch\r\n\t\tfmt.Println(i)\r\n\t\twg.Done()\r\n\t}()\r\n\tgo func() {\r\n\t\tch <- 5\r\n\t\twg.Done()\r\n\t}()\r\n\twg.Wait()\r\n}\r\n```\r\n\r\nIf you want to put multiple elements in, you can directly specify the size of the space when making\r\n\r\n```java\r\nvar wg = sync.WaitGroup{}\r\n\r\nfunc main() {\r\n\tch := make(chan int, 10)\r\n\twg.Add(2)\r\n\tgo func() {\r\n\t\ti := <-ch\r\n\t\tfmt.Println(i)\r\n\t\twg.Done()\r\n\t}()\r\n\tgo func() {\r\n\t\tch <- 5\r\n\t\tch <- 3 //no error\r\n\t\twg.Done()\r\n\t}()\r\n\twg.Wait()\r\n}\r\n```\r\n\r\n## Receive / Send\r\n\r\nIn goroutines, channels can be received and sent, but there will be order problems\r\nline 7, i is waiting for elements in the channel. After line 13 put a element in, line 8 will be executed.\r\nline 14 is also waiting for elements in the channel. After line 9 put a element in, line 14 will be executed.\r\n\r\n```java\r\nvar wg = sync.WaitGroup{}\r\n\r\nfunc main() {\r\n\tch := make(chan int)\r\n\twg.Add(2)\r\n\tgo func() {\r\n\t\ti := <-ch\r\n\t\tfmt.Println(\"from 15\", i)\r\n\t\tch <- 2\r\n\t\twg.Done()\r\n\t}()\r\n\tgo func() {\r\n\t\tch <- 1\r\n\t\tfmt.Println(\"from 21\", <-ch)\r\n\t\twg.Done()\r\n\t}()\r\n\twg.Wait()\r\n}\r\n\r\nfrom 15 1\r\nfrom 21 2\r\n```\r\n\r\nYou can specify whether the goroutines are send on channel or receive only channel to avoid the above problems.\r\n\r\n```java\r\nvar wg = sync.WaitGroup{}\r\n\r\nfunc main() {\r\n\tch := make(chan int)\r\n\twg.Add(2)\r\n\t//receive only channel\r\n\tgo func(ch <-chan int) {\r\n\t\ti := <-ch\r\n\t\tfmt.Println(i)\r\n\t\twg.Done()\r\n\t}(ch)\r\n\t//send only channel\r\n\tgo func(ch chan<- int) {\r\n\t\tch <- 1\r\n\t\twg.Done()\r\n\t}(ch)\r\n\twg.Wait()\r\n}\r\n```\r\n\r\n## for loop with channel\r\n\r\nUse `for := range ch` to loop the channel, when there is a new element in the channel, it will be executed immediately, and it will end when the channel is closed.\r\n`close(ch)` means to close the channel. After closing the channel, there is no way to reopen it, and no more elements can be placed.\r\n\r\n```java\r\nvar wg = sync.WaitGroup{}\r\n\r\nfunc main() {\r\n\tch := make(chan int)\r\n\twg.Add(2)\r\n\tgo func(ch <-chan int) {\r\n\t\tfor i := range ch {\r\n\t\t\tfmt.Println(i)\r\n\t\t}\r\n\t\twg.Done()\r\n\t}(ch)\r\n\tgo func(ch chan<- int) {\r\n\t\tfor i := 0; i < 10; i++ {\r\n\t\t\tch <- i\r\n\t\t}\r\n\t\tclose(ch)\r\n\t\twg.Done()\r\n\t}(ch)\r\n\twg.Wait()\r\n}\r\n\r\n0\r\n1\r\n2\r\n3\r\n4\r\n5\r\n6\r\n7\r\n8\r\n9\r\n```\r\n\r\nIf you can't loop channel directly, you can rewrite it as follows\r\n\r\n```java\r\nvar wg = sync.WaitGroup{}\r\n\r\nfunc main() {\r\n\tch := make(chan int)\r\n\twg.Add(2)\r\n\tgo func(ch <-chan int) {\r\n\t\tfor {\r\n\t\t\t//do something else\r\n\t\t\tif i, ok := <-ch; ok {\r\n\t\t\t\tfmt.Println(i)\r\n\t\t\t} else {\r\n\t\t\t\tbreak\r\n\t\t\t}\r\n\t\t}\r\n\t\twg.Done()\r\n\t}(ch)\r\n\tgo func(ch chan<- int) {\r\n\t\tfor i := 0; i < 3; i++ {\r\n\t\t\tch <- i\r\n\t\t}\r\n\t\tclose(ch)\r\n\t\twg.Done()\r\n\t}(ch)\r\n\twg.Wait()\r\n}\r\n\r\n0\r\n1\r\n2\r\n```\r\n\r\n## Select and struct{}\r\n\r\nThe above methods must close the channel to end the loop.\r\nIf you don't want to end the loop by closing the channel, you can use the second method instead\r\n`select` means that if one of ch and doneCh has an element, it will be executed first. Otherwise, if there is none, it will block.\r\nUse the flag method to break the outer loop\r\n\r\n`doneCh ← struct{}{}`struct{} is the type, and the following {} is the way of creation. Just imagine it as an common obj{}\r\n\r\nThe advantage of `struct{}` is that it does not occupy any memory, it is better than boolean, and it is specially used to detect whether to send a message\r\n\r\n```java\r\nvar wg = sync.WaitGroup{}\r\n\r\nfunc main() {\r\n\tch := make(chan int)\r\n\tdoneCh := make(chan struct{})\r\n\twg.Add(2)\r\n\tgo func(ch <-chan int) {\r\n\tLOOP:\r\n\t\tfor {\r\n\t\t\tselect {\r\n\t\t\tcase entry := <-ch:\r\n\t\t\t\tfmt.Println(entry)\r\n\t\t\tcase <-doneCh:\r\n\t\t\t\tbreak LOOP\r\n\t\t\t}\r\n\t\t}\r\n\t\twg.Done()\r\n\t}(ch)\r\n\tgo func(ch chan<- int) {\r\n\t\tfor i := 0; i < 3; i++ {\r\n\t\t\tch <- i\r\n\t\t}\r\n\t\tdoneCh <- struct{}{}\r\n\t\twg.Done()\r\n\t}(ch)\r\n\twg.Wait()\r\n}\r\n\r\n0\r\n1\r\n2\r\n```\r\n\r\n## Example 2 with closing channel\r\n\r\nGoroutines will be forced to close after the execution of main function. For a safe and smooth shutdown, the following method can be used.\r\n\r\n```java\r\ntype logEntry struct {\r\n\ttime     time.Time\r\n\tseverity string\r\n\tmessage  string\r\n}\r\n\r\nvar logCh = make(chan logEntry, 50)\r\n\r\nfunc main() {\r\n\tgo logger()\r\n\r\n\tlogCh <- logEntry{time.Now(), \"NOTICE\", \"App starting\"}\r\n\tlogCh <- logEntry{time.Now(), \"WARNING\", \"App finishing\"}\r\n\r\n\ttime.Sleep(100 * time.Millisecond)\r\n}\r\n\r\nfunc logger() {\r\n\tfor entry := range logCh {\r\n\t\tfmt.Printf(\"%v - [%v]%v\\n\", entry.time.Format(\"2006-01-02T15:04P:05\"), entry.severity, entry.message)\r\n\t}\r\n}\r\n\r\n2023-04-14T14:37P:26 - [NOTICE]App starting\r\n2023-04-14T14:37P:26 - [WARNING]App finishing\r\n```\r\n\r\n### 1. defer\r\n\r\n```java\r\nfunc main() {\r\n\tgo logger()\r\n\tdefer func() {\r\n\t\tclose(logCh)\r\n\t}()\r\n\tlogCh <- logEntry{time.Now(), \"NOTICE\", \"App starting\"}\r\n\tlogCh <- logEntry{time.Now(), \"WARNING\", \"App finishing\"}\r\n\r\n\ttime.Sleep(100 * time.Millisecond)\r\n}\r\n\r\nfunc logger() {\r\n\tfor entry := range logCh {\r\n\t\tfmt.Printf(\"%v - [%v]%v\\n\", entry.time.Format(\"2006-01-02T15:04P:05\"), entry.severity, entry.message)\r\n\t}\r\n}\r\n```\r\n\r\n### 2. Select and struct{}\r\n\r\n```java\r\nvar logCh = make(chan logEntry, 50)\r\nvar doneCh = make(chan struct{})\r\n\r\nfunc main() {\r\n\tgo logger()\r\n\tlogCh <- logEntry{time.Now(), \"NOTICE\", \"App starting\"}\r\n\tlogCh <- logEntry{time.Now(), \"WARNING\", \"App finishing\"}\r\n\ttime.Sleep(100 * time.Millisecond)\r\n\tdoneCh <- struct{}{}\r\n}\r\n\r\nfunc logger() {\r\nLoop:\r\n\tfor {\r\n\t\tselect {\r\n\t\tcase entry := <-logCh:\r\n\t\t\tfmt.Printf(\"%v - [%v]%v\\n\", entry.time.Format(\"2006-01-02T15:04P:05\"), entry.severity, entry.message)\r\n\t\tcase <-doneCh:\r\n\t\t\tbreak Loop\r\n\t\t}\r\n\t}\r\n}\r\n```",
+      "data": {
+        "title": "Golang Basic - Channel",
+        "date": "2023-05-10 19:57:52",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-channel"
+    },
+    {
+      "content": "[reference source](https://youtu.be/YS4e4q9oBaU?t=6473)\r\n# Array\r\n\r\n## Can only store one type of data\r\n\r\n```java\r\nfunc main() {\r\n\tgrades := [4]int{95, 88, 37}\r\n\tvar names [3]string\r\n\tnames[0] = \"John\"\r\n\tfmt.Printf(\"%v\", grades) //[95 88 37 0]\r\n\tfmt.Printf(\"%v\", names) //[John  ]\r\n}\r\n```\r\n\r\n## non-declaration can also use like this.\r\n\r\n```java\r\nfunc main() {\r\n\tgrades := [...]int{97, 85, 93}\r\n\tfmt.Printf(\"%v\", grades) //[97 85 93]\r\n}\r\n```\r\n\r\n## len(): Length of array (btw, length of string is the same function)\r\n\r\n```java\r\nfunc main() {\r\n\tgrades := [4]int{97, 85, 93}\r\n\tfmt.Printf(\"%v %v\", len(grades)) //4\r\n}\r\n```\r\n\r\n## two-dimension array\r\n\r\n```java\r\nfunc main() {\r\n\tvar names [3]string = [3]string{\"John\", \"Smith\", \"Jenny\"}\r\n\tvar grades [3][1]int = [3][1]int{[1]int{13}, [1]int{22}, [1]int{67}}\r\n\tfmt.Printf(\"%v %v\", names, grades) //[John Smith Jenny] [[13] [22] [67]]\r\n}\r\n```\r\n\r\n## Copy array in go is different with other languages. It’s deep copy.\r\n\r\n```java\r\nfunc main() {\r\n\ta := [...]int{1, 2, 3}\r\n\tb := a\r\n\tb[1] = 4\r\n\tfmt.Printf(\"%v %v\", a, b) //[1 2 3] [1 4 3]\r\n}\r\n```\r\n\r\n## Only if assign by pointer, it’s acting like shallow copy\r\n\r\n```java\r\nfunc main() {\r\n\ta := [...]int{1, 2, 3}\r\n\tb := &a\r\n\tb[0] = 4\r\n\tfmt.Printf(\"%v %v %v\", a, b, *b) //[4 2 3] &[4 2 3] [4 2 3]\r\n}\r\n```\r\n\r\n# Slice\r\n\r\n*arraylist\r\n\r\n## It is very similar to Array, but there is no need to preset the length when creating\r\n\r\n```java\r\nfunc main() {\r\n\ta := []int{1, 2, 3}\r\n\tfmt.Printf(\"%v\", a) //[1 2 3]\r\n}\r\n```\r\n\r\n## In most cases, what Array can do, Slice can do the same\r\n\r\n```java\r\nfunc main() {\r\n\ta := []int{1, 2, 3}\r\n\tfmt.Printf(\"%v %v\", a, len(a)) //[1 2 3] 3\r\n}\r\n```\r\n\r\n## Slice is shallow copy, which is different from Array\r\n\r\n```java\r\nfunc main() {\r\n\ta := []int{1, 2, 3}\r\n\tb := a\r\n\tb[1] = 5\r\n\tfmt.Printf(\"%v %v\", a, b) //[1 5 3] [1 5 3]\r\n}\r\n```\r\n\r\n## cap(): Take the capacity of the slice, which is usually similar to len()\r\n\r\n```java\r\nfunc main() {\r\n\ta := []int{1, 2, 3, 4}\r\n\tfmt.Printf(\"%v %v\", len(a), cap(a)) //4 4\r\n}\r\n```\r\n\r\n## Slice operation, just like slice() in other languages. Array can also use slice operation, but both of them are shallow copy.\r\n\r\n```java\r\nfunc main() {\r\n\ta := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}\r\n\tb := a[:] //all\r\n\tc := a[3:] //from 4th\r\n\td := a[:6] //first 6 elements\r\n\te := a[3:6] //from 4th, to 6th\r\n\tfmt.Println(a) //[1 2 3 4 5 6 7 8 9 10]\r\n\tfmt.Println(b) //[1 2 3 4 5 6 7 8 9 10]\r\n\tfmt.Println(c) //[4 5 6 7 8 9 10]\r\n\tfmt.Println(d) //[1 2 3 4 5 6]\r\n\tfmt.Println(e) //[4 5 6]\r\n\ta[5] = 11\r\n\tfmt.Println(d) //[1 2 3 4 5 11]\r\n}\r\n```\r\n\r\n## make(), param first is the type, second is the len, third is the capacity.\r\n\r\n```java\r\nfunc main() {\r\n\ta := make([]int, 3, 100)\r\n\tfmt.Println(a) //[0 0 0]\r\n\tfmt.Printf(\"len: %v\\n\", len(a)) //3\r\n\tfmt.Printf(\"cap: %v\\n\", cap(a)) //100\r\n}\r\n```\r\n\r\nSlice is like an Array with no length limit. The capacity means that when Slice adds elements to exceed this capacity, it will automatically move all the elements to the new memory.\r\n\r\nIf there are too many elements in the slice, this operation is very expensive, so that when using make() to declare, if you know that the slice has more elements, you will set a higher number for the capacity\r\n\r\n```java\r\nfunc main() {\r\n\ta := []int{}\r\n\tfmt.Printf(\"%v\\n\", len(a)) //0\r\n\tfmt.Printf(\"%v\\n\", cap(a)) //0\r\n\ta = append(a, 1, 2, 3)\r\n\tfmt.Printf(\"%v\\n\", len(a)) //3\r\n\tfmt.Printf(\"%v\\n\", cap(a)) //3 (different compile may not be the same)\r\n}\r\n```\r\n\r\n```java\r\nfunc main() {\r\n\ta := make([]int, 0, 5)\r\n\tfmt.Printf(\"%v\\n\", len(a)) //0\r\n\tfmt.Printf(\"%v\\n\", cap(a)) //5\r\n\ta = append(a, 1, 2, 3)\r\n\tfmt.Printf(\"%v\\n\", len(a)) //3\r\n\tfmt.Printf(\"%v\\n\", cap(a)) //5\r\n}\r\n```\r\n\r\n# Spread Operater\r\n\r\n```java\r\nfunc main() {\r\n\ta := make([]int, 0, 5)\r\n\ta = append(a, 1)\r\n\ta = append(a, []int{2, 3, 4, 5}...) //spead operater, will unpacked the array or slice\r\n\tfmt.Println(a)\r\n}\r\n```",
+      "data": {
+        "title": "Golang Basic - Array & Slice",
+        "date": "2023-05-10 19:52:35",
+        "tags": [
+          "Golang Basic"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "golang-basic-array-and-slice"
+    },
+    {
+      "content": "# 180. Consecutive Numbers (SQL)\r\n###### tags: `leetcode`, `sql`\r\n\r\n[180. Consecutive Numbers](https://leetcode.com/problems/consecutive-numbers/description/)\r\n\r\n### Tips:\r\n1. use ROW_NUMBER OVER(ORDER BY num, id) to rank the num, num must be ordered first.\r\n2. Because ROW_NUMBER() is stored by UNSIGNED, it will cause negative number in (id - ROW_NUMBER()). To avoid this, using CAST(... as SIGNED) to change the datatype is a good option.\r\n3. By changing the num at \"HAVING COUNT(\\*) >= 3\", it can be dynamic.\r\n\r\n### Code:\r\n```sql=\r\nSELECT DISTINCT num as ConsecutiveNums \r\nFROM (\r\n    SELECT num,\r\n     id - CAST(ROW_NUMBER() OVER(ORDER BY num, id) as SIGNED) as rk\r\n      FROM Logs\r\n      ) u \r\n      GROUP BY u.num, u.rk \r\nHAVING COUNT(*) >= 3\r\n```\r\n\r\n```sql=\r\n -- No flexible.\r\n SELECT m.num as ConsecutiveNums FROM Logs m\r\n     INNER JOIN Logs a ON a.num = m.num\r\n     INNER JOIN Logs b ON b.num = m.num\r\n WHERE a.id = m.id + 1 AND b.id = m.id + 2\r\n GROUP BY m.num\r\n```",
+      "data": {
+        "title": "180. Consecutive Numbers (SQL)",
+        "date": "2023-02-13 11:13:33",
+        "tags": [
+          "sql",
+          "leetcode"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "180-consecutive-numbers-sql"
+    },
+    {
       "content": "###### tags: `leetcode`\r\n\r\n[875. Koko Eating Bananas](https://leetcode.com/problems/koko-eating-bananas/description/)\r\n\r\n### Tips:\r\n- From sum the piles into one pile then divided by h, we will get the minimum rate L.\r\n- When piles's amount is equal to h, the maximum rate is R.\r\n- L ~ R, need to find the minimum rate, so it's L <= R.\r\n- ans will be the minimum, so there's no need to use min(ans, k)\r\n### Code:\r\n```python=\r\nclass Solution:\r\n    def minEatingSpeed(self, piles: List[int], h: int) -> int:\r\n        L, R = math.ceil(sum(piles)/h), max(piles)\r\n        ans = R\r\n\r\n        while L <= R:\r\n            k = ((L+R)//2)\r\n            hour = sum(math.ceil(i/k) for i in piles)\r\n            \r\n            if hour > h:\r\n                L = k + 1\r\n            else:\r\n                ans = k\r\n                R = k - 1\r\n        \r\n        return ans\r\n```",
       "data": {
         "title": "875. Koko Eating Bananas",
@@ -402,7 +691,7 @@
         "title": "Three types of Order in Binary Tree with Javascript ( Recursion )",
         "date": "2022-11-07 16:59:26",
         "tags": [
-          "program"
+          "javascript"
         ],
         "published": true,
         "hideInList": false,
@@ -419,7 +708,9 @@
       "data": {
         "title": "vim 指南",
         "date": "2022-11-01 12:07:57",
-        "tags": [],
+        "tags": [
+          "others"
+        ],
         "published": true,
         "hideInList": false,
         "feature": null,
@@ -451,7 +742,9 @@
       "data": {
         "title": "Three types of Order in Binary Tree with Javascript ( Iteration )",
         "date": "2022-10-13 17:57:24",
-        "tags": [],
+        "tags": [
+          "javascript"
+        ],
         "published": true,
         "hideInList": false,
         "feature": null,
@@ -467,8 +760,10 @@
       "data": {
         "title": "Javascript instance Binary Tree with simple code",
         "date": "2022-10-11 16:07:31",
-        "tags": [],
-        "published": false,
+        "tags": [
+          "javascript"
+        ],
+        "published": true,
         "hideInList": false,
         "feature": null,
         "isTop": false
@@ -484,7 +779,7 @@
         "title": "Javascript instance LinkedList with simple code",
         "date": "2022-10-11 14:13:55",
         "tags": [
-          "program"
+          "javascript"
         ],
         "published": true,
         "hideInList": false,
@@ -502,7 +797,7 @@
         "title": "Telegram Bot 開發心得",
         "date": "2022-07-25 17:03:49",
         "tags": [
-          "program"
+          "others"
         ],
         "published": true,
         "hideInList": false,
@@ -517,10 +812,10 @@
     {
       "content": "複製到剪貼簿\r\n```javascript=\r\n    <div onclick=\"copy(this)\">text for copying.</div>\r\n    function copy(element) {\r\n        console.log($(element));\r\n        let str = $(element).text();\r\n        navigator.clipboard.writeText(str).then(() =>\r\n            alert(\"copied\");\r\n        );\r\n    };\r\n```\r\n比直接用append更好的產生element的方式\r\n```javascript=\r\nlet option = $(\"<option>\", {\"d-id\":e['id'], text: e['name']});\r\n$(\"#type\").append(option);\r\n```\r\najax範例\r\n```js=\r\n $.ajax({\r\n            url: url,\r\n            data,\r\n            method: \"GET\",\r\n            dataType: \"json\",\r\n        }.done((rs) => {\r\n\r\n        }).fail((rs) => {\r\n\r\n        })\r\n```\r\najax會重複用的話可以變成一個新的function\r\n```js=\r\n    let callAjax = (data, url, method, dataType) => {\r\n        return $.ajax({\r\n            url,\r\n            data,\r\n            method,\r\n            dataType,\r\n        });\r\n    }\r\n    callAjax(data, url, method, dataType).done()...\r\n```\r\n\r\nArray common function\r\n\r\n```javascript=\r\n//add vs delete\r\npush()  pop() //latest element in this array\r\nunshift()  shift() //first element in this array\r\n\r\nsplice(index, nums) //remove the specified position element with multiple amount.\r\n\r\nreverse() //reverse this array.\r\n\r\narr1.concat(arr2) // return a new array with two arrays combination, it won't change neither arr1 nor arr2.\r\n\r\nincludes(val) //return true if array contains this value, else return false\r\n\r\nindexOf(val) //like include, but return the position, or -1\r\n\r\njoin(', ') //print out the element as string, split with argument\r\n```\r\n\r\n",
       "data": {
-        "title": "常用的程式碼 - Javascript",
+        "title": "Common used - Javascript",
         "date": "2022-07-25 14:31:42",
         "tags": [
-          "常用的程式碼"
+          "Common used"
         ],
         "published": true,
         "hideInList": false,
@@ -535,10 +830,10 @@
     {
       "content": "創建新欄位\r\n在TABLE內新增欄位\r\nALTER TABLE 資料表名稱 ADD COLUMN 欄位名稱 形態(長度);\r\nALTER TABLE member ADD COLUMN tg_id int(64) NOT NULL AFTER FB_id, ADD INDEX(tg_id);\r\n在TABLE內新增欄位，欄位必須加入INDEX並且設定DEFAULT值\r\nALTER TABLE 資料表名稱 ADD COLUMN 欄位名稱 形態(長度), ADD INDEX(欄位名稱);\r\n\r\n\r\n刪除所有問號\r\nUPDATE `test` SET `content`= REPLACE(content, '?', '') WHERE `content` LIKE \"%?%\"\r\n\r\n正規表達式\r\nUPDATE `test` SET `msg`=REGEXP_REPLACE(msg,'(.*)( $)','\\\\1') WHERE msg REGEXP '.* $'\r\n\r\n查所有外來鍵\r\nSELECT * FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE = \"FOREIGN KEY\" AND CONSTRAINT_SCHEMA = \"test\"\r\n\r\n叢集+GROUP BY\r\nSELECT name, subject FROM `student`, score GROUP BY name, subject\r\n\r\n範例 拿缺考的學生\r\nSELECT name, subject FROM `student`, score WHERE (subject, name) NOT IN ( SELECT s.subject as subject, c.name as name FROM score s LEFT JOIN student c ON c.id = s.id) GROUP BY name, subject\r\n\r\n排名 DENSE_RANK()\r\nSELECT score, DENSE_RANK() OVER (\r\n    ORDER BY score DESC\r\n) `rank`\r\nFROM Scores ORDER BY score DESC;\r\n\r\n取第二高的薪水，沒有的話顯示null\r\nSELECT CASE WHEN COUNT(b.c) > 0 THEN b.c ELSE null END AS SecondHighestSalary\r\nFROM (SELECT DISTINCT salary as c FROM Employee ORDER BY salary DESC LIMIT 1,1) b;\r\n\r\n//看別人的，優化版\r\nSELECT (CASE \r\n        WHEN (SELECT COUNT(DISTINCT Salary) FROM Employee) < 2 \r\n        THEN NULL \r\n        ELSE (SELECT Salary FROM Employee \r\n              ORDER BY Salary DESC LIMIT 1,1) \r\n        END) AS SecondHighestSalary\r\n\r\n跳過前3筆 OFFSET\r\nSELECT DISTINCT(salary) from Employee order by salary DESC LIMIT 1 OFFSET 3",
       "data": {
-        "title": "常用的程式碼 - MySQL",
+        "title": "Common used - MySQL",
         "date": "2022-07-13 11:49:01",
         "tags": [
-          "常用的程式碼"
+          "Common used"
         ],
         "published": true,
         "hideInList": false,
@@ -553,10 +848,10 @@
     {
       "content": "git add --all :/ 加入所有有修改的檔案\r\n(在根目錄 git add . 是一樣的效果)\r\ngit add -u 檔名有改/刪除的話用這個\r\ngit config --global --list\r\ngit reset HEAD filename 取消git add的檔案\r\ngit stash 暫存目前修改的狀態，然後還原成原本的樣子(untrach的file不會被暫存)\r\ngit stash pop 還原最新一筆stash\r\ngit stash list 列出所有暫存\r\ngit commit -m \"註解\" commit直接下註解",
       "data": {
-        "title": "常用的程式碼 - git",
+        "title": "Common used - git",
         "date": "2022-07-13 11:42:03",
         "tags": [
-          "常用的程式碼"
+          "Common used"
         ],
         "published": true,
         "hideInList": false,
@@ -571,10 +866,10 @@
     {
       "content": "ps aux|grep master //查所有socket的執行緒\r\nss -nlp|grep 5000 //5000是port 查對應的pid用\r\nkill -15 {pid} 砍pid的程式，會跟著砍子程式，程式當機會砍不掉\r\nkill -9 {pid} 強制砍pid的程式，子程式的父pid會變1\r\nphp server_global_customer.php 可以開socket\r\ncrontab -e 編輯crontab\r\n-l 看crontab\r\n-r 全部刪除\r\n\r\n查檔案\r\nfind . -name \"*.txt\"\r\n\r\nkill -USR1 {pid} 熱重啟(socket主程式修改的話要砍掉重開)\r\ntail -f swoole.log 一直偵測log的最新訊息\r\ntail -f swoole.log | grep \"關鍵字\" 偵測關鍵字\r\ncat swoole.log | grep \"關鍵字\" 印出所有有關鍵字的\r\necho > swoole.log 清空log\r\ncat swoole.log | grep \"關鍵字\" -C 5 印出關鍵字與上下五行\r\ncat swoole.log | grep \"關鍵字\" > text.log 把log寫進text.log\r\n\r\ngit config --global  --list\r\n\r\ngrep -Frnw '.' -e '登入頁面' 目錄中找關鍵字\r\n-F 用簡單的字串查詢\r\n-r recursive\r\n-n 列出Line\r\n-w 字串全部對上才會顯示\r\n\r\nnetstat -tulpn | grep LISTEN 查PORT+PID",
       "data": {
-        "title": "常用的程式碼 - 指令",
+        "title": "Common used - Command",
         "date": "2022-07-13 11:38:45",
         "tags": [
-          "常用的程式碼"
+          "Common used"
         ],
         "published": true,
         "hideInList": false,
@@ -589,10 +884,10 @@
     {
       "content": "\r\n```php=\r\n    //SELECT\r\n    Yii::app()->db->createCommand(\"SELECT * FROM test WHERE id = 1\")->queryAll();\r\n    //UPDATE, DELETE, INSERT\r\n    Yii::app()->db->createCommand(\"...\")->execute();\r\n\r\n    //Model Search\r\n    //By Attributes\r\n    $member = Member::model()->findByAttributes(['role' => 1]);\r\n    //Primary key, ex: id = 1\r\n    $member = Member::model()->findByPk(1);\r\n\r\n    //transaction start\r\n    $transaction = Yii::app()->db->beginTransaction();\r\n    //commit\r\n    $transaction->commit();\r\n    //rollback\r\n    $transaction->rollback();\r\n\r\n    //request\r\n    $request = app()->request;\r\n    //GET, default = 1\r\n    $id = $request->getQuery('id', '1');\r\n    //POST\r\n    //is this from post\r\n    if($request->isPostRequest){...}\r\n    //getPost, default = 1\r\n    $id = $request->getPost('id', '1');\r\n\r\n    //dataProvider by array data\r\n    $dataProvider = new CArrayDataProvider($data, [\r\n    'sort' => array(\r\n        'defaultOrder' => 'id ASC',\r\n        'attributes' => array(\r\n            \"id\", \"count\" //可以點擊排序\r\n        )\r\n    ),\r\n]);\r\n\r\n//Criteria\r\n$criteria = new CDbCriteria;\r\n$criteria->addBetweenCondition('t.created_at', $dateStart, $dateEnd);\r\n$dataProvider = new CActiveDataProvider('tablename', [\r\n    'criteria' => $criteria,\r\n    'sort' => array(\r\n        'attributes' => array(\r\n            '*'\r\n        ),\r\n    ),\r\n]);\r\n\r\n```\r\n\r\nModel 配 GridView 要用到FK的時候\r\n在model內命名一個public $var;\r\nmodel的rules的on => search前面加上要查詢的FK\r\n```php=\r\narray('id, content, type', 'safe', 'on' => 'search')\r\n```\r\n1. 在model內有用relations\r\n```php=\r\n$criteria->with = ['orig'];\r\n$criteria->compare('orig.type', $this->type, true);\r\n```\r\n2. 在model內沒有用relations，或其他需要join的時候\r\n```php=\r\n$criteria->join = 'LEFT JOIN member b ON b.id = t.upper';\r\n$criteria->compare('b.username', $this->upper_username, true);\r\n```\r\n在return的地方兩者都需要在attributes內加上排序用\r\n```php=\t\r\nreturn new CActiveDataProvider('ModelName', array(\r\n        'criteria' => $criteria,\r\n        'sort' => array(\r\n            'attributes' => array(\r\n                'type' => array(\r\n                    'asc' => 'orig.type',\r\n                    'desc' => 'orig.type DESC',\r\n                ),\r\n                '*',\r\n            ),\r\n        ),\r\n    ));\r\n```\r\nview的地方\r\n為了可以查詢，要加上name\r\n如果是用relations的話，沒有特別要寫html就不需要value了\r\n```php=\r\n[\r\n    'name' => 'type',\r\n    'type' => 'raw', //value return 的才會變html\r\n    'header' => '類型',\r\n    'headerHtmlOptions' => array(\"class\" => 'span3'),\r\n    'value' => function ($data)\r\n    {\r\n        return \"<h3>\".$data->orig->type.\"</h3>\"\r\n    }\r\n],\r\n```\r\n\r\nview的CGridView直接用relations\r\n```php=\r\n[\r\n    'header' => 'id',\r\n    'value' => '$data->relations->id,\r\n],\r\n```\r\n\r\n用toggle快速改狀態\r\n```php=\r\n\r\n<?php\r\nYii::app()->clientScript->registerCssFile('/include/bootstrap-toggle/css/bootstrap2-toggle.min.css');\r\nYii::app()->clientScript->registerScriptFile('/include/bootstrap-toggle/js/bootstrap2-toggle.min.js');\r\n\r\n//GridView\r\n[\r\n    'header' => '已發送',\r\n    'type' => 'raw',\r\n    'value' => function ($data)\r\n    {\r\n        $check = ($data->paid == 0) ? '' : 'checked';\r\n        return \"<input {$check} class='active-btn' onchange='toggleActive({$data->id})' data-toggle='toggle' data-on='Y' data-off='N' data-onstyle='success' data-offstyle='danger' type='checkbox'>\";\r\n    },\r\n],\r\n?>\r\n<script type=\"text/javascript\">\r\n\t// 修改狀態\r\n\tfunction toggleActive(id) {\r\n\t\t$.ajax({\r\n\t\t    url: \"<?= $this->createUrl('ToggleActive'); ?>\",\r\n\t\t    type: \"POST\",\r\n\t\t    dataType: \"JSON\",\r\n\t\t    data: {\r\n\t\t    \tid:id\r\n\t\t    },\r\n\t\t    success: function (response) {\r\n\t\t        alert((response.status == 1) ? '修改成功' : response.msg);\r\n\t\t    },\r\n\t\t    error: function (XMLHttpRequest, textStatus, errorThrown) {\r\n\t\t        alert(XMLHttpRequest.readyState + XMLHttpRequest.status + XMLHttpRequest.responseText);\r\n\t\t    },\r\n\t\t});\r\n\t}\r\n</script>\r\n\r\n//controller的部分\r\n<?php\r\n    public function actionToggleActive()\r\n    {\r\n        $request = app()->request;\r\n        if ($request->isPostRequest) {\r\n            try {\r\n                $id = $request->getPost('id');\r\n                if (!isset($id))\r\n                    throw new Exception('Error', 1);\r\n\r\n                $model = Member::model()->findByPk($id);\r\n                if (!$model)\r\n                    throw new Exception('查無資料', 1);\r\n\r\n                $model->status = ($model->status == 0) ? 1 : 0;\r\n                $model->saveAttributes(['status']);\r\n\r\n                echo json_encode([\r\n                    'status' => 1,\r\n                ]);\r\n            } catch (Exception $e) {\r\n                echo json_encode([\r\n                    'status' => 0,\r\n                    'msg' => $e->getMessage(),\r\n                ]);\r\n            }\r\n        }\r\n    }\r\n    ?>\r\n```\r\n\r\naccessRule\r\n```php=\r\n<?php\r\n    public function accessRules()\r\n    {\r\n        return array(\r\n            [\r\n                //所有會員\r\n                'allow',\r\n                'actions' => ['a'],\r\n                'users' => ['*'],\r\n            ],\r\n            [\r\n                //登入的會員無法到登入、註冊\r\n                'deny',\r\n                'actions' => ['login', 'register'],\r\n                'users' => ['@'],\r\n                'deniedCallback' => function () {\r\n                    Yii::app()->controller->redirect(['/site/index']);\r\n                },\r\n            ],\r\n            [\r\n                //expression，誰適用於這個規則，配deniedCallback\r\n                'deny',\r\n                'users' => ['@'],\r\n                'expression' => [$this, 'isStatusNotAllowed'],\r\n                'deniedCallback' => function () {\r\n                    Yii::app()->controller->redirect(['/site/index']);\r\n                },\r\n            ],\r\n            [\r\n                //expression，也可用在allow\r\n                'allow',\r\n                'actions' => ['b'],\r\n                'users' => ['@'],\r\n                'expression' => [$this, 'isStatusAllow'],\r\n            ],\r\n            [\r\n                'allow',\r\n                'users' => ['@'],\r\n            ],\r\n            [\r\n                //未登入的會員\r\n                'allow',\r\n                'actions' => ['login', 'register'],\r\n                'users' => ['?'],\r\n            ],\r\n            [\r\n                //deny所有，做安全保障\r\n                'deny',\r\n                'users' => ['*'],\r\n                'deniedCallback' => function () {\r\n                    Yii::app()->controller->redirect(['/site/login']);\r\n                },\r\n            ],\r\n        );\r\n    }\r\n\r\n    protected function isStatusNotAllowed()\r\n    {\r\n        if (app()->user->isGuest) return false;\r\n        $notAllowed = [...];\r\n        $member = Member::model()->findByAttributes(['id' => app()->user->id]);\r\n        return in_array($member->status, $notAllowed);\r\n    }\r\n\r\n    protected function isStatusAllow()\r\n    {\r\n        $member = Member::model()->findByAttributes(['id' => app()->user->id]);\r\n        return !$member->status == Member::STATUS_ALLOW;\r\n    }\r\n?>\r\n```",
       "data": {
-        "title": "常用的程式碼 - Yii",
+        "title": "Common used - Yii",
         "date": "2022-07-13 11:37:14",
         "tags": [
-          "常用的程式碼"
+          "Common used"
         ],
         "published": true,
         "hideInList": false,
@@ -610,7 +905,7 @@
         "title": "kill -9 v.s. kill -15",
         "date": "2022-07-11 16:43:13",
         "tags": [
-          "program"
+          "others"
         ],
         "published": true,
         "hideInList": false,
@@ -623,12 +918,12 @@
       "fileName": "kill-9-vs-kill-15"
     },
     {
-      "content": "\r\n<h1>PHP</h1>\r\n\r\nDateTime\r\n```php=\r\n//拿現在時間\r\n$dt = new \\DateTime('NOW');\r\n//拿月初 2022-07-01 00:00:00\r\n$dateStart = $dt->format('Y-m-01 00:00:00');\r\n//拿月底 2022-07-31 23:59:59\r\n$dateEnd = $dt->format('Y-m-t 23:59:59');\r\n//拿上個月月初\r\n$dateStart = date('Y-m-01 00:00:00', strtotime('-1 month'));\r\n//拿上個月月底\r\n$dateEnd = date('Y-m-t 23:59:59', strtotime($dateStart));\r\n\r\n//日期轉成星期幾\r\n$day = DayOfWeekToChineseDay(date('w', strtotime($dateStart)));\r\n$dateStartShow = date(\"Y-m-d({$day}) H:i:s\", strtotime($dateStart));\r\n    \r\nfunction DayOfWeekToChineseDay($day)\r\n{\r\n    switch ($day) {\r\n        case \"0\":\r\n            return \"日\";\r\n        case \"1\":\r\n            return \"一\";\r\n        case \"2\":\r\n            return \"二\";\r\n        case \"3\":\r\n            return \"三\";\r\n        case \"4\":\r\n            return \"四\";\r\n        case \"5\":\r\n            return \"五\";\r\n        case \"6\":\r\n            return \"六\";\r\n    }\r\n}\r\n```\r\n\r\n密碼驗證\r\n```php=\r\n// 線上生成的都用這個，很好用\r\n// https://phppasswordhash.com/\r\n// 產生PWD\r\npassword_hash($pwd, PASSWORD_DEFAULT)\r\n// 驗證用\r\npassword_verify($pwd, $hash)，正確回傳true\r\nif (!password_verify($pwd, $hash))\r\n    throw new Exception(\"錯誤\");\r\n```\r\n\r\nArray\r\n```php=\r\n//array_chunk($arr, $len, bool $preserve_keys) 切割陣列內元素成子陣列，preserve_keys = true會保留KEY\r\n$d = [1,2,3,4];\r\nprint_r(array_chunk($d, 2));\r\noutput: [[1,2], [3,4]]\r\n\r\n//implode(\" \", $arr) Array to String connects with needles\r\n$d = [1,2,3,4];\r\nprint_r(implode(\" \", $d));\r\noutput: 1 2 3 4\r\n\r\n//explode(\" \", $str) String to Array split with needles\r\n$s = \"1 2 3 4\";\r\nprint_r(explode(\" \",$s));\r\noutput: [1,2,3,4]\r\n```",
+      "content": "<h1>PHP</h1>\r\n\r\nDateTime\r\n```php=\r\n//拿現在時間\r\n$dt = new \\DateTime('NOW');\r\n//拿月初 2022-07-01 00:00:00\r\n$dateStart = $dt->format('Y-m-01 00:00:00');\r\n//拿月底 2022-07-31 23:59:59\r\n$dateEnd = $dt->format('Y-m-t 23:59:59');\r\n//拿上個月月初\r\n$dateStart = date('Y-m-01 00:00:00', strtotime('-1 month'));\r\n//拿上個月月底\r\n$dateEnd = date('Y-m-t 23:59:59', strtotime($dateStart));\r\n\r\n//日期轉成星期幾\r\n$day = DayOfWeekToChineseDay(date('w', strtotime($dateStart)));\r\n$dateStartShow = date(\"Y-m-d({$day}) H:i:s\", strtotime($dateStart));\r\n    \r\nfunction DayOfWeekToChineseDay($day)\r\n{\r\n    switch ($day) {\r\n        case \"0\":\r\n            return \"日\";\r\n        case \"1\":\r\n            return \"一\";\r\n        case \"2\":\r\n            return \"二\";\r\n        case \"3\":\r\n            return \"三\";\r\n        case \"4\":\r\n            return \"四\";\r\n        case \"5\":\r\n            return \"五\";\r\n        case \"6\":\r\n            return \"六\";\r\n    }\r\n}\r\n```\r\n\r\n密碼驗證\r\n```php=\r\n// 線上生成的都用這個，很好用\r\n// https://phppasswordhash.com/\r\n// 產生PWD\r\npassword_hash($pwd, PASSWORD_DEFAULT)\r\n// 驗證用\r\npassword_verify($pwd, $hash)，正確回傳true\r\nif (!password_verify($pwd, $hash))\r\n    throw new Exception(\"錯誤\");\r\n```\r\n\r\nArray\r\n```php=\r\n//array_chunk($arr, $len, bool $preserve_keys) 切割陣列內元素成子陣列，preserve_keys = true會保留KEY\r\n$d = [1,2,3,4];\r\nprint_r(array_chunk($d, 2));\r\noutput: [[1,2], [3,4]]\r\n\r\n//implode(\" \", $arr) Array to String connects with needles\r\n$d = [1,2,3,4];\r\nprint_r(implode(\" \", $d));\r\noutput: 1 2 3 4\r\n\r\n//explode(\" \", $str) String to Array split with needles\r\n$s = \"1 2 3 4\";\r\nprint_r(explode(\" \",$s));\r\noutput: [1,2,3,4]\r\n```",
       "data": {
-        "title": "常用的程式碼 - PHP",
+        "title": "Common used - PHP",
         "date": "2022-07-07 14:09:00",
         "tags": [
-          "常用的程式碼"
+          "Common used"
         ],
         "published": true,
         "hideInList": false,
@@ -641,28 +936,12 @@
       "fileName": "chang-yong-de-cheng-shi-ma-ji-lu"
     },
     {
-      "content": "\r\n<span class=\"subtitle\">拿來測CSS方便我寫作 珍香</span>\r\n```php=\r\n$j = 1;\r\n$j += 2;\r\nconsole.log(\"hji\");\r\n```",
-      "data": {
-        "title": "測試CSS",
-        "date": "2022-06-23 15:35:12",
-        "tags": [],
-        "published": false,
-        "hideInList": true,
-        "feature": null,
-        "isTop": false
-      },
-      "isEmpty": false,
-      "excerpt": "",
-      "abstract": "",
-      "fileName": "ce-shi-css"
-    },
-    {
       "content": "<span class=\"subtitle\">前言</span> <span class=\"content\">個人隨筆，簡單紀錄一下會用到的時機</span>\r\n\r\n---\r\nSQL = RDBMS，關聯式資料庫\r\nNoSQL 就是相反的非關聯式資料庫\r\n\r\nSQL可以保證資料的完整性，永久性，還可以保證獨一性，對於需要用到有互相關連的資料會比較適合，像是作者跟文章，然後這作者又有自己的設定檔、簡介等等情況，用SQL會比較方便。\r\nSQL的Schema需要先設計好，不然之後要更改的時候如果有資料了會很麻煩，因為資料型態要一樣。\r\n不好用於分散式資料庫，因為不同資料彼此之間可能會有關聯，如果分散在不同資料庫，查詢起來會很麻煩，通常要升級效能的話直接升級伺服器會比較好（vertical scaling）。\r\n\r\nNoSQL的話就像一堆文件存在伺服器內，每個文件的資料格式不用一樣，目前還沒有遇到會想使用NoSQL的情況，用於分散式資料庫會比較方便（horizontal scaling），畢竟都是存文件，也不會需要注意一致性跟完整性的問題，所以與其升級一台主機的效能，不如多開幾台幫忙存就好了。",
       "data": {
         "title": "SQL vs NoSQL",
         "date": "2022-06-23 15:03:57",
         "tags": [
-          "program"
+          "others"
         ],
         "published": true,
         "hideInList": false,
@@ -677,6 +956,26 @@
   ],
   "tags": [
     {
+      "name": "Golang Basic",
+      "slug": "hl18hCdAP",
+      "used": true
+    },
+    {
+      "name": "Common used",
+      "slug": "hevQ_ITqL",
+      "used": true
+    },
+    {
+      "name": "others",
+      "slug": "gYy3vmfCl",
+      "used": true
+    },
+    {
+      "name": "sql",
+      "slug": "e2ksjSHDX",
+      "used": true
+    },
+    {
       "name": "javascript",
       "slug": "fQfrV7sv2",
       "used": true
@@ -684,18 +983,6 @@
     {
       "name": "leetcode",
       "slug": "IPziRV_tR",
-      "used": true
-    },
-    {
-      "index": -1,
-      "name": "常用的程式碼",
-      "slug": "nXMUqZgXX",
-      "used": true
-    },
-    {
-      "index": -1,
-      "name": "program",
-      "slug": "hBJuzNhU4",
       "used": true
     }
   ],
@@ -708,11 +995,6 @@
     {
       "link": "/archives",
       "name": "Archives",
-      "openType": "Internal"
-    },
-    {
-      "link": "/tags",
-      "name": "Tags",
       "openType": "Internal"
     }
   ]

@@ -1,7 +1,7 @@
 ---
-title: '常用的程式碼 - MySQL'
+title: 'Common used - MySQL'
 date: 2022-07-13 11:49:01
-tags: [常用的程式碼]
+tags: [Common used]
 published: true
 hideInList: false
 feature: 

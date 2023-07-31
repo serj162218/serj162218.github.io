@@ -1,8 +1,8 @@
 ---
 title: 'Javascript instance Binary Tree with simple code'
 date: 2022-10-11 16:07:31
-tags: []
-published: false
+tags: [javascript]
+published: true
 hideInList: false
 feature: 
 isTop: false

@@ -1,7 +1,7 @@
 ---
-title: '常用的程式碼 - Yii'
+title: 'Common used - Yii'
 date: 2022-07-13 11:37:14
-tags: [常用的程式碼]
+tags: [Common used]
 published: true
 hideInList: false
 feature: 

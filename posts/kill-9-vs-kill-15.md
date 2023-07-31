@@ -1,7 +1,7 @@
 ---
 title: 'kill -9 v.s. kill -15'
 date: 2022-07-11 16:43:13
-tags: [program]
+tags: [others]
 published: true
 hideInList: false
 feature: 

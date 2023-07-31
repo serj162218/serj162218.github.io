@@ -1,7 +1,7 @@
 ---
 title: 'SQL vs NoSQL'
 date: 2022-06-23 15:03:57
-tags: [program]
+tags: [others]
 published: true
 hideInList: false
 feature: 

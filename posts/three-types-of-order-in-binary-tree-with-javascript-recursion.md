@@ -1,7 +1,7 @@
 ---
 title: 'Three types of Order in Binary Tree with Javascript ( Recursion )'
 date: 2022-11-07 16:59:26
-tags: [program]
+tags: [javascript]
 published: true
 hideInList: false
 feature: 

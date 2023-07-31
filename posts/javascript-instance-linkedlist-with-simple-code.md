@@ -1,7 +1,7 @@
 ---
 title: 'Javascript instance LinkedList with simple code'
 date: 2022-10-11 14:13:55
-tags: [program]
+tags: [javascript]
 published: true
 hideInList: false
 feature: 

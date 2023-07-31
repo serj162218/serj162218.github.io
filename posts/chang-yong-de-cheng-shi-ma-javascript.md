@@ -1,7 +1,7 @@
 ---
-title: '常用的程式碼 - Javascript'
+title: 'Common used - Javascript'
 date: 2022-07-25 14:31:42
-tags: [常用的程式碼]
+tags: [Common used]
 published: true
 hideInList: false
 feature: 

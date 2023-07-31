@@ -1,13 +1,12 @@
 ---
-title: '常用的程式碼 - PHP'
+title: 'Common used - PHP'
 date: 2022-07-07 14:09:00
-tags: [常用的程式碼]
+tags: [Common used]
 published: true
 hideInList: false
 feature: 
 isTop: false
 ---
-
 <h1>PHP</h1>
 
 DateTime

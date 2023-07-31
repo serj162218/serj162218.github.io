@@ -1,7 +1,7 @@
 ---
-title: '常用的程式碼 - git'
+title: 'Common used - git'
 date: 2022-07-13 11:42:03
-tags: [常用的程式碼]
+tags: [Common used]
 published: true
 hideInList: false
 feature: 

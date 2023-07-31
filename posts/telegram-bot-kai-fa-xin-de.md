@@ -1,7 +1,7 @@
 ---
 title: 'Telegram Bot 開發心得'
 date: 2022-07-25 17:03:49
-tags: [program]
+tags: [others]
 published: true
 hideInList: false
 feature: 

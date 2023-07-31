@@ -1,7 +1,7 @@
 ---
-title: '常用的程式碼 - 指令'
+title: 'Common used - Command'
 date: 2022-07-13 11:38:45
-tags: [常用的程式碼]
+tags: [Common used]
 published: true
 hideInList: false
 feature: 
